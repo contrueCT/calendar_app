@@ -19,11 +19,12 @@ class LunarText extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = LunarUtils.getDisplayText(date);
     final lunarDate = LunarUtils.getLunarDate(date);
-    
+
     // 判断是否为特殊日期（节气、节日）
-    final isSpecial = (lunarDate.solarTerm?.isNotEmpty ?? false) || 
-                      lunarDate.lunarFestivals.isNotEmpty ||
-                      lunarDate.solarFestivals.isNotEmpty;
+    final isSpecial =
+        (lunarDate.solarTerm?.isNotEmpty ?? false) ||
+        lunarDate.lunarFestivals.isNotEmpty ||
+        lunarDate.solarFestivals.isNotEmpty;
 
     if (showFestivalOnly && !isSpecial) {
       return const SizedBox.shrink();
@@ -31,7 +32,7 @@ class LunarText extends StatelessWidget {
 
     final defaultStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
       fontSize: 10,
-      color: isSpecial 
+      color: isSpecial
           ? Theme.of(context).colorScheme.primary
           : Theme.of(context).colorScheme.onSurfaceVariant,
     );
@@ -60,7 +61,10 @@ class LunarDetailText extends StatelessWidget {
     this.showGanZhi = true,
     this.showZodiac = true,
     this.style,
-  }) : assert(date != null || lunarDateInput != null, 'Either date or lunarDateInput must be provided');
+  }) : assert(
+         date != null || lunarDateInput != null,
+         'Either date or lunarDateInput must be provided',
+       );
 
   /// 便捷构造函数：直接传入 LunarDate
   const LunarDetailText.fromLunarDate({
@@ -80,10 +84,7 @@ class LunarDetailText extends StatelessWidget {
 
     // 如果提供了自定义样式，使用简化的单行显示
     if (style != null) {
-      return Text(
-        _buildSimpleText(lunarDate),
-        style: style,
-      );
+      return Text(_buildSimpleText(lunarDate), style: style);
     }
 
     return Column(
@@ -92,12 +93,10 @@ class LunarDetailText extends StatelessWidget {
         // 农历日期
         Text(
           lunarDate.fullDateString,
-          style: textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurface,
-          ),
+          style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
         ),
         const SizedBox(height: 4),
-        
+
         // 干支纪年
         if (showGanZhi)
           Text(
@@ -106,7 +105,7 @@ class LunarDetailText extends StatelessWidget {
               color: colorScheme.onSurfaceVariant,
             ),
           ),
-        
+
         // 生肖
         if (showZodiac)
           Text(
@@ -115,7 +114,7 @@ class LunarDetailText extends StatelessWidget {
               color: colorScheme.onSurfaceVariant,
             ),
           ),
-        
+
         // 节气
         if (lunarDate.solarTerm?.isNotEmpty ?? false)
           Text(
@@ -125,9 +124,10 @@ class LunarDetailText extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-        
+
         // 节日
-        if (lunarDate.lunarFestivals.isNotEmpty || lunarDate.solarFestivals.isNotEmpty)
+        if (lunarDate.lunarFestivals.isNotEmpty ||
+            lunarDate.solarFestivals.isNotEmpty)
           Text(
             '节日：${[...lunarDate.lunarFestivals, ...lunarDate.solarFestivals].join('、')}',
             style: textTheme.bodySmall?.copyWith(
@@ -142,15 +142,15 @@ class LunarDetailText extends StatelessWidget {
   String _buildSimpleText(LunarDate lunarDate) {
     final parts = <String>[];
     parts.add(lunarDate.fullDateString);
-    
+
     if (lunarDate.solarTerm?.isNotEmpty ?? false) {
       parts.add(lunarDate.solarTerm!);
     }
-    
+
     if (lunarDate.lunarFestivals.isNotEmpty) {
       parts.add(lunarDate.lunarFestivals.first);
     }
-    
+
     return parts.join(' · ');
   }
 }

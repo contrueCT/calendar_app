@@ -32,12 +32,7 @@ class EventCard extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border(
-              left: BorderSide(
-                color: eventColor,
-                width: 4,
-              ),
-            ),
+            border: Border(left: BorderSide(color: eventColor, width: 4)),
           ),
           padding: const EdgeInsets.all(12),
           child: Column(
@@ -58,24 +53,24 @@ class EventCard extends StatelessWidget {
                   ),
                   if (event.event.isAllDay)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
-                        color: eventColor.withOpacity(0.1),
+                        color: eventColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
                         '全天',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: eventColor,
-                        ),
+                        style: TextStyle(fontSize: 12, color: eventColor),
                       ),
                     ),
                 ],
               ),
-              
+
               const SizedBox(height: 4),
-              
+
               // 时间信息
               Row(
                 children: [
@@ -93,9 +88,10 @@ class EventCard extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               // 地点
-              if (event.event.location != null && event.event.location!.isNotEmpty) ...[
+              if (event.event.location != null &&
+                  event.event.location!.isNotEmpty) ...[
                 const SizedBox(height: 4),
                 Row(
                   children: [
@@ -118,7 +114,7 @@ class EventCard extends StatelessWidget {
                   ],
                 ),
               ],
-              
+
               // 重复标记
               if (event.event.isRecurring) ...[
                 const SizedBox(height: 4),
@@ -148,7 +144,7 @@ class EventCard extends StatelessWidget {
 
   String _formatTimeRange(EventInstance event) {
     final timeFormat = DateFormat('HH:mm');
-    
+
     if (event.event.isAllDay) {
       final dateFormat = DateFormat('M月d日');
       if (showDate) {
@@ -156,18 +152,16 @@ class EventCard extends StatelessWidget {
       }
       return '全天';
     }
-    
+
     final start = timeFormat.format(event.instanceStart);
-    final end = event.instanceEnd != null 
-        ? timeFormat.format(event.instanceEnd!)
-        : '';
-    
+    final end = timeFormat.format(event.instanceEnd);
+
     if (showDate) {
       final dateFormat = DateFormat('M月d日');
-      return '${dateFormat.format(event.instanceStart)} $start${end.isNotEmpty ? ' - $end' : ''}';
+      return '${dateFormat.format(event.instanceStart)} $start - $end';
     }
-    
-    return end.isNotEmpty ? '$start - $end' : start;
+
+    return '$start - $end';
   }
 }
 
@@ -176,11 +170,7 @@ class CompactEventCard extends StatelessWidget {
   final EventInstance event;
   final VoidCallback? onTap;
 
-  const CompactEventCard({
-    super.key,
-    required this.event,
-    this.onTap,
-  });
+  const CompactEventCard({super.key, required this.event, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -193,14 +183,9 @@ class CompactEventCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         decoration: BoxDecoration(
-          color: eventColor.withOpacity(0.1),
+          color: eventColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(6),
-          border: Border(
-            left: BorderSide(
-              color: eventColor,
-              width: 3,
-            ),
-          ),
+          border: Border(left: BorderSide(color: eventColor, width: 3)),
         ),
         child: Row(
           children: [
@@ -218,10 +203,7 @@ class CompactEventCard extends StatelessWidget {
             Expanded(
               child: Text(
                 event.event.summary,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: colorScheme.onSurface,
-                ),
+                style: TextStyle(fontSize: 13, color: colorScheme.onSurface),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

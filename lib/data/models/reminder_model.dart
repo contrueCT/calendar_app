@@ -37,19 +37,19 @@ class ReminderModel {
   /// 获取提醒时间描述
   String get triggerDescription {
     if (triggerMinutes == 0) return '事件发生时';
-    if (triggerMinutes < 60) return '提前${triggerMinutes}分钟';
+    if (triggerMinutes < 60) return '提前$triggerMinutes分钟';
     if (triggerMinutes < 1440) {
       final hours = triggerMinutes ~/ 60;
       final mins = triggerMinutes % 60;
-      if (mins == 0) return '提前${hours}小时';
-      return '提前${hours}小时${mins}分钟';
+      if (mins == 0) return '提前$hours小时';
+      return '提前$hours小时$mins分钟';
     }
     final days = triggerMinutes ~/ 1440;
     final remainingMins = triggerMinutes % 1440;
-    if (remainingMins == 0) return '提前${days}天';
+    if (remainingMins == 0) return '提前$days天';
     final hours = remainingMins ~/ 60;
-    if (hours > 0) return '提前${days}天${hours}小时';
-    return '提前${days}天${remainingMins}分钟';
+    if (hours > 0) return '提前$days天$hours小时';
+    return '提前$days天$remainingMins分钟';
   }
 
   /// 从数据库Map创建

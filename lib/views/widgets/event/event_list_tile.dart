@@ -60,54 +60,54 @@ class EventListTile extends StatelessWidget {
   String _getSubtitle() {
     final timeFormat = DateFormat('HH:mm');
     final dateFormat = DateFormat('M月d日');
-    
+
     if (event.event.isAllDay) {
       if (showDate) {
         return '${dateFormat.format(event.instanceStart)} 全天';
       }
       return '全天';
     }
-    
+
     final start = timeFormat.format(event.instanceStart);
-    final end = event.instanceEnd != null 
-        ? ' - ${timeFormat.format(event.instanceEnd!)}'
-        : '';
-    
+    final end = ' - ${timeFormat.format(event.instanceEnd)}';
+
     if (showDate) {
       return '${dateFormat.format(event.instanceStart)} $start$end';
     }
-    
+
     return '$start$end';
   }
 
   Widget? _buildTrailing(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final indicators = <Widget>[];
-    
+
     if (event.event.isRecurring) {
-      indicators.add(Icon(
-        Icons.repeat,
-        size: 16,
-        color: colorScheme.onSurfaceVariant,
-      ));
+      indicators.add(
+        Icon(Icons.repeat, size: 16, color: colorScheme.onSurfaceVariant),
+      );
     }
-    
+
     if (event.event.reminders.isNotEmpty) {
-      indicators.add(Icon(
-        Icons.notifications_outlined,
-        size: 16,
-        color: colorScheme.onSurfaceVariant,
-      ));
+      indicators.add(
+        Icon(
+          Icons.notifications_outlined,
+          size: 16,
+          color: colorScheme.onSurfaceVariant,
+        ),
+      );
     }
-    
+
     if (indicators.isEmpty) return null;
-    
+
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: indicators.map((icon) => Padding(
-        padding: const EdgeInsets.only(left: 4),
-        child: icon,
-      )).toList(),
+      children: indicators
+          .map(
+            (icon) =>
+                Padding(padding: const EdgeInsets.only(left: 4), child: icon),
+          )
+          .toList(),
     );
   }
 }
@@ -143,7 +143,7 @@ class GroupedEventList extends StatelessWidget {
       itemBuilder: (context, index) {
         final date = sortedDates[index];
         final events = eventsByDate[date] ?? [];
-        
+
         if (events.isEmpty && !showEmptyDates) {
           return const SizedBox.shrink();
         }
@@ -153,17 +153,22 @@ class GroupedEventList extends StatelessWidget {
           children: [
             // 日期头部
             headerBuilder?.call(date) ?? _buildDefaultHeader(context, date),
-            
+
             // 事件列表
             if (events.isNotEmpty)
-              ...events.map((event) => EventListTile(
-                event: event,
-                onTap: onEventTap != null ? () => onEventTap!(event) : null,
-                dense: true,
-              ))
+              ...events.map(
+                (event) => EventListTile(
+                  event: event,
+                  onTap: onEventTap != null ? () => onEventTap!(event) : null,
+                  dense: true,
+                ),
+              )
             else
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Text(
                   '暂无日程',
                   style: TextStyle(
@@ -185,7 +190,7 @@ class GroupedEventList extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
       child: Row(
         children: [
           if (isToday)
@@ -219,6 +224,8 @@ class GroupedEventList extends StatelessWidget {
 
   bool _isToday(DateTime date) {
     final now = DateTime.now();
-    return date.year == now.year && date.month == now.month && date.day == now.day;
+    return date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day;
   }
 }

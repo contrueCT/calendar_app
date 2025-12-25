@@ -50,6 +50,9 @@ class CalendarModel {
   /// 获取颜色对象
   Color get colorValue => Color(color);
 
+  /// 获取显示名称（兼容属性）
+  String get displayName => name;
+
   /// 从数据库Map创建
   factory CalendarModel.fromMap(Map<String, dynamic> map) {
     return CalendarModel(

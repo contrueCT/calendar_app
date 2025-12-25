@@ -287,27 +287,27 @@ class RecurrenceRule {
 
     switch (frequency) {
       case Frequency.daily:
-        desc = interval == 1 ? '每天' : '每${interval}天';
+        desc = interval == 1 ? '每天' : '每$interval天';
         break;
       case Frequency.weekly:
-        desc = interval == 1 ? '每周' : '每${interval}周';
+        desc = interval == 1 ? '每周' : '每$interval周';
         if (byDay != null && byDay!.isNotEmpty) {
           desc += '（${byDay!.map((d) => d.label).join('、')}）';
         }
         break;
       case Frequency.monthly:
-        desc = interval == 1 ? '每月' : '每${interval}个月';
+        desc = interval == 1 ? '每月' : '每$interval个月';
         if (byMonthDay != null && byMonthDay!.isNotEmpty) {
-          desc += '（${byMonthDay!.map((d) => '${d}日').join('、')}）';
+          desc += '（${byMonthDay!.map((d) => '$d日').join('、')}）';
         }
         break;
       case Frequency.yearly:
-        desc = interval == 1 ? '每年' : '每${interval}年';
+        desc = interval == 1 ? '每年' : '每$interval年';
         break;
     }
 
     if (count != null) {
-      desc += '，共${count}次';
+      desc += '，共$count次';
     } else if (until != null) {
       desc += '，直到${until!.year}年${until!.month}月${until!.day}日';
     }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/calendar_viewmodel.dart';
 import '../../data/models/event_model.dart';
+import '../../config/routes.dart';
 import 'month_view_screen.dart';
 import 'week_view_screen.dart';
 import 'day_view_screen.dart';
@@ -78,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
           },
           tooltip: '今天',
         ),
-        
+
         // 视图切换按钮
         Consumer<CalendarViewModel>(
           builder: (context, viewModel, child) {
@@ -111,15 +112,12 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           },
         ),
-        
+
         // 设置按钮
         IconButton(
           icon: const Icon(Icons.settings),
           onPressed: () {
-            // TODO: 导航到设置页面
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('设置功能将在后续阶段实现')),
-            );
+            Navigator.of(context).pushNamed(Routes.settings);
           },
           tooltip: '设置',
         ),
@@ -173,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
           },
           onEventTap: (event) => _handleEventTap(context, event),
         );
-      
+
       case CalendarViewMode.week:
         return WeekViewScreen(
           initialDate: viewModel.selectedDate,
@@ -181,9 +179,10 @@ class _HomeScreenState extends State<HomeScreen> {
             viewModel.selectDate(day);
           },
           onEventTap: (event) => _handleEventTap(context, event),
-          onTimeSlotTap: (date, hour) => _handleTimeSlotTap(context, date, hour),
+          onTimeSlotTap: (date, hour) =>
+              _handleTimeSlotTap(context, date, hour),
         );
-      
+
       case CalendarViewMode.day:
         return DayViewScreen(
           initialDate: viewModel.selectedDate,
@@ -191,7 +190,8 @@ class _HomeScreenState extends State<HomeScreen> {
             viewModel.selectDate(day);
           },
           onEventTap: (event) => _handleEventTap(context, event),
-          onTimeSlotTap: (date, hour) => _handleTimeSlotTap(context, date, hour),
+          onTimeSlotTap: (date, hour) =>
+              _handleTimeSlotTap(context, date, hour),
         );
     }
   }
@@ -228,7 +228,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     return Text(
                       '${viewModel.calendars.length} 个日历 · ${viewModel.events.length} 个事件',
                       style: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary.withValues(alpha: 0.8),
                         fontSize: 12,
                       ),
                     );
@@ -237,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          
+
           // 日历管理
           ListTile(
             leading: const Icon(Icons.calendar_today),
@@ -245,12 +247,12 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () {
               Navigator.pop(context);
               // TODO: 导航到日历管理页面
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('日历管理功能将在后续阶段实现')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('日历管理功能将在后续阶段实现')));
             },
           ),
-          
+
           // 订阅管理
           ListTile(
             leading: const Icon(Icons.cloud_download),
@@ -258,12 +260,12 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () {
               Navigator.pop(context);
               // TODO: 导航到订阅管理页面
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('订阅管理功能将在后续阶段实现')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('订阅管理功能将在后续阶段实现')));
             },
           ),
-          
+
           // 导入/导出
           ListTile(
             leading: const Icon(Icons.import_export),
@@ -271,27 +273,24 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () {
               Navigator.pop(context);
               // TODO: 导航到导入导出页面
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('导入/导出功能将在后续阶段实现')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('导入/导出功能将在后续阶段实现')));
             },
           ),
-          
+
           const Divider(),
-          
+
           // 设置
           ListTile(
             leading: const Icon(Icons.settings),
             title: const Text('设置'),
             onTap: () {
               Navigator.pop(context);
-              // TODO: 导航到设置页面
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('设置功能将在后续阶段实现')),
-              );
+              Navigator.of(context).pushNamed(Routes.settings);
             },
           ),
-          
+
           // 关于
           ListTile(
             leading: const Icon(Icons.info_outline),
@@ -337,16 +336,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _handleAddEvent(BuildContext context) {
     // TODO: 导航到添加事件页面
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('添加事件功能将在后续阶段实现')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('添加事件功能将在后续阶段实现')));
   }
 
   void _handleEventTap(BuildContext context, EventInstance event) {
     // TODO: 导航到事件详情页面
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('查看事件: ${event.event.summary}')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('查看事件: ${event.event.summary}')));
   }
 
   void _handleTimeSlotTap(BuildContext context, DateTime date, int hour) {

@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 import '../views/screens/home_screen.dart';
+import '../views/screens/event_detail_screen.dart';
+import '../views/screens/event_edit_screen.dart';
+import '../views/screens/settings_screen.dart';
+import '../views/screens/calendar_manage_screen.dart';
+import '../views/screens/subscription_screen.dart';
+import '../views/screens/import_export_screen.dart';
+import '../data/models/event_model.dart';
 
 /// 路由名称常量
 class Routes {
@@ -11,10 +18,27 @@ class Routes {
   static const String dayView = '/day';
   static const String eventDetail = '/event/detail';
   static const String eventEdit = '/event/edit';
+  static const String eventCreate = '/event/create';
   static const String calendarManage = '/calendar/manage';
   static const String subscription = '/subscription';
   static const String importExport = '/import-export';
   static const String settings = '/settings';
+}
+
+/// 事件详情页参数
+class EventDetailArguments {
+  final EventInstance instance;
+
+  const EventDetailArguments({required this.instance});
+}
+
+/// 事件编辑页参数
+class EventEditArguments {
+  final EventModel? event;
+  final DateTime? initialDate;
+  final TimeOfDay? initialTime;
+
+  const EventEditArguments({this.event, this.initialDate, this.initialTime});
 }
 
 /// 路由配置
@@ -28,46 +52,44 @@ class AppRouter {
         return _buildRoute(const HomeScreen(), settings);
 
       case Routes.eventDetail:
-        // TODO: 返回事件详情页
+        final args = settings.arguments as EventDetailArguments;
         return _buildRoute(
-          const Placeholder(child: Center(child: Text('事件详情'))),
+          EventDetailScreen(instance: args.instance),
           settings,
         );
 
       case Routes.eventEdit:
-        // TODO: 返回事件编辑页
+        final args = settings.arguments as EventEditArguments?;
         return _buildRoute(
-          const Placeholder(child: Center(child: Text('事件编辑'))),
+          EventEditScreen(
+            event: args?.event,
+            initialDate: args?.initialDate,
+            initialTime: args?.initialTime,
+          ),
+          settings,
+        );
+
+      case Routes.eventCreate:
+        final args = settings.arguments as EventEditArguments?;
+        return _buildRoute(
+          EventEditScreen(
+            initialDate: args?.initialDate,
+            initialTime: args?.initialTime,
+          ),
           settings,
         );
 
       case Routes.calendarManage:
-        // TODO: 返回日历管理页
-        return _buildRoute(
-          const Placeholder(child: Center(child: Text('日历管理'))),
-          settings,
-        );
+        return _buildRoute(const CalendarManageScreen(), settings);
 
       case Routes.subscription:
-        // TODO: 返回订阅管理页
-        return _buildRoute(
-          const Placeholder(child: Center(child: Text('订阅管理'))),
-          settings,
-        );
+        return _buildRoute(const SubscriptionScreen(), settings);
 
       case Routes.importExport:
-        // TODO: 返回导入导出页
-        return _buildRoute(
-          const Placeholder(child: Center(child: Text('导入导出'))),
-          settings,
-        );
+        return _buildRoute(const ImportExportScreen(), settings);
 
       case Routes.settings:
-        // TODO: 返回设置页
-        return _buildRoute(
-          const Placeholder(child: Center(child: Text('设置'))),
-          settings,
-        );
+        return _buildRoute(const SettingsScreen(), settings);
 
       default:
         return _buildRoute(

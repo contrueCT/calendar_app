@@ -30,15 +30,15 @@ class CalendarCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     // 确定文字颜色
     Color textColor;
     if (isSelected) {
       textColor = colorScheme.onPrimary;
     } else if (isOutsideMonth) {
-      textColor = colorScheme.outline.withOpacity(0.5);
+      textColor = colorScheme.outline.withValues(alpha: 0.5);
     } else if (isWeekend) {
-      textColor = colorScheme.error.withOpacity(0.8);
+      textColor = colorScheme.error.withValues(alpha: 0.8);
     } else {
       textColor = colorScheme.onSurface;
     }
@@ -73,11 +73,13 @@ class CalendarCell extends StatelessWidget {
                 date.day.toString(),
                 style: TextStyle(
                   fontSize: 16,
-                  fontWeight: isToday || isSelected ? FontWeight.bold : FontWeight.normal,
+                  fontWeight: isToday || isSelected
+                      ? FontWeight.bold
+                      : FontWeight.normal,
                   color: textColor,
                 ),
               ),
-              
+
               // 农历日期
               if (showLunar)
                 Padding(
@@ -86,15 +88,15 @@ class CalendarCell extends StatelessWidget {
                     date: date,
                     style: TextStyle(
                       fontSize: 9,
-                      color: isSelected 
-                          ? colorScheme.onPrimary.withOpacity(0.8)
+                      color: isSelected
+                          ? colorScheme.onPrimary.withValues(alpha: 0.8)
                           : isOutsideMonth
-                              ? colorScheme.outline.withOpacity(0.4)
-                              : null,
+                          ? colorScheme.outline.withValues(alpha: 0.4)
+                          : null,
                     ),
                   ),
                 ),
-              
+
               // 事件标记
               if (eventColors.isNotEmpty)
                 Padding(
@@ -131,8 +133,9 @@ class WeekDayHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isWeekend = date.weekday == DateTime.saturday || date.weekday == DateTime.sunday;
-    
+    final isWeekend =
+        date.weekday == DateTime.saturday || date.weekday == DateTime.sunday;
+
     final weekDayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
     final weekDayName = weekDayNames[date.weekday - 1];
 
@@ -143,10 +146,7 @@ class WeekDayHeader extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected ? colorScheme.primaryContainer : null,
           border: Border(
-            bottom: BorderSide(
-              color: colorScheme.outlineVariant,
-              width: 1,
-            ),
+            bottom: BorderSide(color: colorScheme.outlineVariant, width: 1),
           ),
         ),
         child: Column(
@@ -156,8 +156,8 @@ class WeekDayHeader extends StatelessWidget {
               weekDayName,
               style: TextStyle(
                 fontSize: 12,
-                color: isWeekend 
-                    ? colorScheme.error.withOpacity(0.8)
+                color: isWeekend
+                    ? colorScheme.error.withValues(alpha: 0.8)
                     : colorScheme.onSurfaceVariant,
               ),
             ),
@@ -175,11 +175,11 @@ class WeekDayHeader extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                    color: isToday 
+                    color: isToday
                         ? colorScheme.onPrimary
-                        : isWeekend 
-                            ? colorScheme.error.withOpacity(0.8)
-                            : colorScheme.onSurface,
+                        : isWeekend
+                        ? colorScheme.error.withValues(alpha: 0.8)
+                        : colorScheme.onSurface,
                   ),
                 ),
               ),

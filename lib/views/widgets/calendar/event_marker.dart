@@ -42,10 +42,7 @@ class EventMarker extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 }
@@ -65,16 +62,20 @@ class MultiEventMarkers extends StatelessWidget {
     this.size = 6.0,
     this.maxMarkers = 3,
     this.spacing = 2.0,
-  }) : assert(colors != null || events != null, 'Either colors or events must be provided');
+  }) : assert(
+         colors != null || events != null,
+         'Either colors or events must be provided',
+       );
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     // 获取颜色列表
-    final colorList = colors ?? 
+    final colorList =
+        colors ??
         events!.map((e) => e.event.colorValue ?? colorScheme.primary).toList();
-    
+
     if (colorList.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -134,14 +135,9 @@ class EventBar extends StatelessWidget {
         child: Container(
           height: height,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.2),
+            color: color.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(4),
-            border: Border(
-              left: BorderSide(
-                color: color,
-                width: 3,
-              ),
-            ),
+            border: Border(left: BorderSide(color: color, width: 3)),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           child: Row(
@@ -156,14 +152,14 @@ class EventBar extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: color.computeLuminance() > 0.5 
-                            ? Colors.black87 
+                        color: color.computeLuminance() > 0.5
+                            ? Colors.black87
                             : color,
                       ),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
-                    if (subtitle != null && height >= 36) 
+                    if (subtitle != null && height >= 36)
                       Text(
                         subtitle!,
                         style: TextStyle(
@@ -178,17 +174,17 @@ class EventBar extends StatelessWidget {
               ),
               if (isAllDay)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 1,
+                  ),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.3),
+                    color: color.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
                   child: Text(
                     '全天',
-                    style: TextStyle(
-                      fontSize: 9,
-                      color: color,
-                    ),
+                    style: TextStyle(fontSize: 9, color: color),
                   ),
                 ),
             ],

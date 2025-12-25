@@ -46,13 +46,11 @@ class _MonthViewScreenState extends State<MonthViewScreen> {
           children: [
             // 日历组件
             _buildCalendar(context, viewModel),
-            
+
             const Divider(height: 1),
-            
+
             // 选中日期的事件列表
-            Expanded(
-              child: _buildEventList(context, viewModel),
-            ),
+            Expanded(child: _buildEventList(context, viewModel)),
           ],
         );
       },
@@ -90,10 +88,7 @@ class _MonthViewScreenState extends State<MonthViewScreen> {
           fontSize: 18,
           fontWeight: FontWeight.w600,
         ),
-        leftChevronIcon: Icon(
-          Icons.chevron_left,
-          color: colorScheme.onSurface,
-        ),
+        leftChevronIcon: Icon(Icons.chevron_left, color: colorScheme.onSurface),
         rightChevronIcon: Icon(
           Icons.chevron_right,
           color: colorScheme.onSurface,
@@ -105,7 +100,7 @@ class _MonthViewScreenState extends State<MonthViewScreen> {
         weekendTextStyle: TextStyle(color: colorScheme.error),
         outsideTextStyle: TextStyle(color: colorScheme.outline),
         todayDecoration: BoxDecoration(
-          color: colorScheme.primary.withOpacity(0.2),
+          color: colorScheme.primary.withValues(alpha: 0.2),
           shape: BoxShape.circle,
         ),
         todayTextStyle: TextStyle(
@@ -163,11 +158,7 @@ class _MonthViewScreenState extends State<MonthViewScreen> {
           if (events.isEmpty) return null;
           return Positioned(
             bottom: 4,
-            child: MultiEventMarkers(
-              events: events,
-              maxMarkers: 3,
-              size: 6,
-            ),
+            child: MultiEventMarkers(events: events, maxMarkers: 3, size: 6),
           );
         },
       ),
@@ -206,16 +197,17 @@ class _MonthViewScreenState extends State<MonthViewScreen> {
   ) {
     final colorScheme = Theme.of(context).colorScheme;
     final lunarDate = LunarUtils.solarToLunar(day);
-    final isWeekend = day.weekday == DateTime.saturday || day.weekday == DateTime.sunday;
+    final isWeekend =
+        day.weekday == DateTime.saturday || day.weekday == DateTime.sunday;
 
     return Container(
       margin: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: isSelected 
-            ? colorScheme.primary 
-            : isToday 
-                ? colorScheme.primary.withOpacity(0.1) 
-                : null,
+        color: isSelected
+            ? colorScheme.primary
+            : isToday
+            ? colorScheme.primary.withValues(alpha: 0.1)
+            : null,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -226,12 +218,14 @@ class _MonthViewScreenState extends State<MonthViewScreen> {
             '${day.day}',
             style: TextStyle(
               fontSize: 16,
-              fontWeight: isToday || isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected 
-                  ? colorScheme.onPrimary 
-                  : isWeekend 
-                      ? colorScheme.error 
-                      : colorScheme.onSurface,
+              fontWeight: isToday || isSelected
+                  ? FontWeight.bold
+                  : FontWeight.normal,
+              color: isSelected
+                  ? colorScheme.onPrimary
+                  : isWeekend
+                  ? colorScheme.error
+                  : colorScheme.onSurface,
             ),
           ),
           // 农历日期
@@ -239,9 +233,9 @@ class _MonthViewScreenState extends State<MonthViewScreen> {
             LunarUtils.getLunarDayText(lunarDate),
             style: TextStyle(
               fontSize: 10,
-              color: isSelected 
-                  ? colorScheme.onPrimary.withOpacity(0.8) 
-                  : colorScheme.onSurface.withOpacity(0.6),
+              color: isSelected
+                  ? colorScheme.onPrimary.withValues(alpha: 0.8)
+                  : colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
         ],
@@ -262,14 +256,14 @@ class _MonthViewScreenState extends State<MonthViewScreen> {
             '${day.day}',
             style: TextStyle(
               fontSize: 16,
-              color: colorScheme.outline.withOpacity(0.5),
+              color: colorScheme.outline.withValues(alpha: 0.5),
             ),
           ),
           Text(
             LunarUtils.getLunarDayText(lunarDate),
             style: TextStyle(
               fontSize: 10,
-              color: colorScheme.outline.withOpacity(0.3),
+              color: colorScheme.outline.withValues(alpha: 0.3),
             ),
           ),
         ],
@@ -279,7 +273,7 @@ class _MonthViewScreenState extends State<MonthViewScreen> {
 
   Widget _buildEventList(BuildContext context, CalendarViewModel viewModel) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     if (_selectedDay == null) {
       return EmptyState.noEvents();
     }
@@ -319,16 +313,14 @@ class _MonthViewScreenState extends State<MonthViewScreen> {
               const Spacer(),
               Text(
                 '${events.length} 个日程',
-                style: TextStyle(
-                  color: colorScheme.outline,
-                ),
+                style: TextStyle(color: colorScheme.outline),
               ),
             ],
           ),
         ),
-        
+
         const Divider(height: 1),
-        
+
         // 事件列表
         Expanded(
           child: events.isEmpty
@@ -336,11 +328,8 @@ class _MonthViewScreenState extends State<MonthViewScreen> {
               : ListView.separated(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   itemCount: events.length,
-                  separatorBuilder: (context, index) => const Divider(
-                    height: 1,
-                    indent: 16,
-                    endIndent: 16,
-                  ),
+                  separatorBuilder: (context, index) =>
+                      const Divider(height: 1, indent: 16, endIndent: 16),
                   itemBuilder: (context, index) {
                     final event = events[index];
                     return EventListTile(

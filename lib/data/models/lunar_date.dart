@@ -129,7 +129,7 @@ class LunarDate {
 
   /// 获取完整的农历日期字符串
   String get fullDateString {
-    return '${yearGanZhi}年$monthInChinese$dayInChinese';
+    return '$yearGanZhi年$monthInChinese$dayInChinese';
   }
 
   /// 获取年份信息字符串（如：乙巳年 蛇）

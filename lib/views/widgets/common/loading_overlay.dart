@@ -24,7 +24,7 @@ class LoadingOverlay extends StatelessWidget {
         child,
         if (isLoading)
           Container(
-            color: backgroundColor ?? Colors.black.withOpacity(0.3),
+            color: backgroundColor ?? Colors.black.withValues(alpha: 0.3),
             child: Center(
               child: Card(
                 elevation: 4,
@@ -34,7 +34,9 @@ class LoadingOverlay extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       CircularProgressIndicator(
-                        color: progressColor ?? Theme.of(context).colorScheme.primary,
+                        color:
+                            progressColor ??
+                            Theme.of(context).colorScheme.primary,
                       ),
                       if (message != null) ...[
                         const SizedBox(height: 16),
@@ -69,10 +71,7 @@ class SimpleLoadingIndicator extends StatelessWidget {
           const CircularProgressIndicator(),
           if (message != null) ...[
             const SizedBox(height: 16),
-            Text(
-              message!,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            Text(message!, style: Theme.of(context).textTheme.bodyMedium),
           ],
         ],
       ),

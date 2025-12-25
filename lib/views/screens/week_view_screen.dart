@@ -32,7 +32,6 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
   DateTime? _selectedDay;
   late ScrollController _scrollController;
   final double _hourHeight = 60.0;
-  final double _dayColumnWidth = 48.0;
 
   @override
   void initState() {
@@ -40,7 +39,7 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
     _focusedDay = widget.initialDate ?? DateTime.now();
     _selectedDay = _focusedDay;
     _scrollController = ScrollController();
-    
+
     // 初始滚动到当前时间
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToCurrentTime();
@@ -73,16 +72,14 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
           children: [
             // 周日历头部
             _buildWeekCalendar(context, viewModel),
-            
+
             const Divider(height: 1),
-            
+
             // 全天事件
             _buildAllDayEvents(context, viewModel),
-            
+
             // 时间轴视图
-            Expanded(
-              child: _buildTimeAxisView(context, viewModel),
-            ),
+            Expanded(child: _buildTimeAxisView(context, viewModel)),
           ],
         );
       },
@@ -101,7 +98,7 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
       availableCalendarFormats: const {CalendarFormat.week: '周'},
       locale: 'zh_CN',
       startingDayOfWeek: StartingDayOfWeek.sunday,
-      
+
       headerStyle: HeaderStyle(
         formatButtonVisible: false,
         titleCentered: true,
@@ -115,10 +112,7 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
           fontSize: 16,
           fontWeight: FontWeight.w600,
         ),
-        leftChevronIcon: Icon(
-          Icons.chevron_left,
-          color: colorScheme.onSurface,
-        ),
+        leftChevronIcon: Icon(Icons.chevron_left, color: colorScheme.onSurface),
         rightChevronIcon: Icon(
           Icons.chevron_right,
           color: colorScheme.onSurface,
@@ -129,7 +123,7 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
         outsideDaysVisible: false,
         weekendTextStyle: TextStyle(color: colorScheme.error),
         todayDecoration: BoxDecoration(
-          color: colorScheme.primary.withOpacity(0.2),
+          color: colorScheme.primary.withValues(alpha: 0.2),
           shape: BoxShape.circle,
         ),
         todayTextStyle: TextStyle(
@@ -178,19 +172,25 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
     );
   }
 
-  Widget _buildDayCell(BuildContext context, DateTime day, bool isToday, bool isSelected) {
+  Widget _buildDayCell(
+    BuildContext context,
+    DateTime day,
+    bool isToday,
+    bool isSelected,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     final lunarDate = LunarUtils.solarToLunar(day);
-    final isWeekend = day.weekday == DateTime.saturday || day.weekday == DateTime.sunday;
+    final isWeekend =
+        day.weekday == DateTime.saturday || day.weekday == DateTime.sunday;
 
     return Container(
       margin: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: isSelected 
-            ? colorScheme.primary 
-            : isToday 
-                ? colorScheme.primary.withOpacity(0.1) 
-                : null,
+        color: isSelected
+            ? colorScheme.primary
+            : isToday
+            ? colorScheme.primary.withValues(alpha: 0.1)
+            : null,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -200,21 +200,23 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
             '${day.day}',
             style: TextStyle(
               fontSize: 16,
-              fontWeight: isToday || isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected 
-                  ? colorScheme.onPrimary 
-                  : isWeekend 
-                      ? colorScheme.error 
-                      : colorScheme.onSurface,
+              fontWeight: isToday || isSelected
+                  ? FontWeight.bold
+                  : FontWeight.normal,
+              color: isSelected
+                  ? colorScheme.onPrimary
+                  : isWeekend
+                  ? colorScheme.error
+                  : colorScheme.onSurface,
             ),
           ),
           Text(
             LunarUtils.getLunarDayText(lunarDate),
             style: TextStyle(
               fontSize: 9,
-              color: isSelected 
-                  ? colorScheme.onPrimary.withOpacity(0.8) 
-                  : colorScheme.onSurface.withOpacity(0.6),
+              color: isSelected
+                  ? colorScheme.onPrimary.withValues(alpha: 0.8)
+                  : colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
         ],
@@ -224,10 +226,10 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
 
   Widget _buildAllDayEvents(BuildContext context, CalendarViewModel viewModel) {
     if (_selectedDay == null) return const SizedBox.shrink();
-    
+
     final events = viewModel.getEventsForDay(_selectedDay!);
     final allDayEvents = events.where((e) => e.event.isAllDay).toList();
-    
+
     return AllDayEventBar(
       allDayEvents: allDayEvents,
       onEventTap: widget.onEventTap,
@@ -235,8 +237,6 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
   }
 
   Widget _buildTimeAxisView(BuildContext context, CalendarViewModel viewModel) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
     if (_selectedDay == null) {
       return EmptyState.noEvents();
     }
@@ -264,12 +264,9 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
             );
           },
         ),
-        
+
         // 当前时间指示器（仅当查看今天时显示）
-        if (isToday)
-          CurrentTimeIndicator(
-            slotHeight: _hourHeight,
-          ),
+        if (isToday) CurrentTimeIndicator(slotHeight: _hourHeight),
       ],
     );
   }

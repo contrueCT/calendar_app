@@ -31,7 +31,7 @@ class _DayViewScreenState extends State<DayViewScreen> {
   late ScrollController _scrollController;
   late PageController _pageController;
   final double _hourHeight = 60.0;
-  
+
   // 用于PageView计算的基准日期
   final DateTime _baseDate = DateTime(2000, 1, 1);
 
@@ -40,11 +40,11 @@ class _DayViewScreenState extends State<DayViewScreen> {
     super.initState();
     _selectedDate = widget.initialDate ?? DateTime.now();
     _scrollController = ScrollController();
-    
+
     // 计算初始页面索引
     final initialPage = _selectedDate.difference(_baseDate).inDays;
     _pageController = PageController(initialPage: initialPage);
-    
+
     // 初始滚动到当前时间
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToCurrentTime();
@@ -70,24 +70,6 @@ class _DayViewScreenState extends State<DayViewScreen> {
     }
   }
 
-  void _goToToday() {
-    final today = DateTime.now();
-    final todayDate = DateTime(today.year, today.month, today.day);
-    final pageIndex = todayDate.difference(_baseDate).inDays;
-    
-    _pageController.animateToPage(
-      pageIndex,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
-    );
-    
-    setState(() {
-      _selectedDate = todayDate;
-    });
-    
-    _scrollToCurrentTime();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<CalendarViewModel>(
@@ -96,9 +78,9 @@ class _DayViewScreenState extends State<DayViewScreen> {
           children: [
             // 日期导航头部
             _buildDateHeader(context, viewModel),
-            
+
             const Divider(height: 1),
-            
+
             // 日视图内容（支持左右滑动）
             Expanded(
               child: PageView.builder(
@@ -143,7 +125,7 @@ class _DayViewScreenState extends State<DayViewScreen> {
               );
             },
           ),
-          
+
           // 日期信息
           Expanded(
             child: Column(
@@ -162,7 +144,10 @@ class _DayViewScreenState extends State<DayViewScreen> {
                     if (isToday)
                       Container(
                         margin: const EdgeInsets.only(left: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: colorScheme.primary,
                           borderRadius: BorderRadius.circular(4),
@@ -188,7 +173,7 @@ class _DayViewScreenState extends State<DayViewScreen> {
               ],
             ),
           ),
-          
+
           // 后一天按钮
           IconButton(
             icon: const Icon(Icons.chevron_right),
@@ -204,7 +189,11 @@ class _DayViewScreenState extends State<DayViewScreen> {
     );
   }
 
-  Widget _buildDayContent(BuildContext context, DateTime date, CalendarViewModel viewModel) {
+  Widget _buildDayContent(
+    BuildContext context,
+    DateTime date,
+    CalendarViewModel viewModel,
+  ) {
     final events = viewModel.getEventsForDay(date);
     final allDayEvents = events.where((e) => e.event.isAllDay).toList();
     final timedEvents = events.where((e) => !e.event.isAllDay).toList();
@@ -220,7 +209,7 @@ class _DayViewScreenState extends State<DayViewScreen> {
             onEventTap: widget.onEventTap,
             maxVisibleEvents: 3,
           ),
-        
+
         // 时间轴
         Expanded(
           child: Stack(
@@ -240,12 +229,9 @@ class _DayViewScreenState extends State<DayViewScreen> {
                   );
                 },
               ),
-              
+
               // 当前时间指示器
-              if (isToday)
-                CurrentTimeIndicator(
-                  slotHeight: _hourHeight,
-                ),
+              if (isToday) CurrentTimeIndicator(slotHeight: _hourHeight),
             ],
           ),
         ),
@@ -255,7 +241,9 @@ class _DayViewScreenState extends State<DayViewScreen> {
 
   bool _isToday(DateTime date) {
     final now = DateTime.now();
-    return date.year == now.year && date.month == now.month && date.day == now.day;
+    return date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day;
   }
 }
 
@@ -283,18 +271,18 @@ class DaySelector extends StatelessWidget {
         children: weekDays.map((day) {
           final isSelected = _isSameDay(day, selectedDate);
           final isToday = _isSameDay(day, DateTime.now());
-          
+
           return GestureDetector(
             onTap: () => onDateChanged?.call(day),
             child: Container(
               width: 44,
               padding: const EdgeInsets.symmetric(vertical: 4),
               decoration: BoxDecoration(
-                color: isSelected 
-                    ? colorScheme.primary 
-                    : isToday 
-                        ? colorScheme.primary.withOpacity(0.1) 
-                        : null,
+                color: isSelected
+                    ? colorScheme.primary
+                    : isToday
+                    ? colorScheme.primary.withValues(alpha: 0.1)
+                    : null,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -304,8 +292,8 @@ class DaySelector extends StatelessWidget {
                     _getWeekDayLabel(day.weekday),
                     style: TextStyle(
                       fontSize: 11,
-                      color: isSelected 
-                          ? colorScheme.onPrimary 
+                      color: isSelected
+                          ? colorScheme.onPrimary
                           : colorScheme.onSurfaceVariant,
                     ),
                   ),
@@ -315,11 +303,11 @@ class DaySelector extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: isSelected 
-                          ? colorScheme.onPrimary 
-                          : isToday 
-                              ? colorScheme.primary 
-                              : colorScheme.onSurface,
+                      color: isSelected
+                          ? colorScheme.onPrimary
+                          : isToday
+                          ? colorScheme.primary
+                          : colorScheme.onSurface,
                     ),
                   ),
                 ],

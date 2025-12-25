@@ -18,18 +18,14 @@ class EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 64,
-              color: colorScheme.outline,
-            ),
+            Icon(icon, size: 64, color: colorScheme.outline),
             const SizedBox(height: 16),
             Text(
               title,
@@ -42,16 +38,13 @@ class EmptyState extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 subtitle!,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.outline,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: colorScheme.outline),
                 textAlign: TextAlign.center,
               ),
             ],
-            if (action != null) ...[
-              const SizedBox(height: 24),
-              action!,
-            ],
+            if (action != null) ...[const SizedBox(height: 24), action!],
           ],
         ),
       ),
@@ -59,9 +52,7 @@ class EmptyState extends StatelessWidget {
   }
 
   /// 无事件状态
-  factory EmptyState.noEvents({
-    VoidCallback? onAddEvent,
-  }) {
+  factory EmptyState.noEvents({VoidCallback? onAddEvent}) {
     return EmptyState(
       icon: Icons.event_busy,
       title: '暂无日程',
@@ -77,9 +68,7 @@ class EmptyState extends StatelessWidget {
   }
 
   /// 无日历状态
-  factory EmptyState.noCalendars({
-    VoidCallback? onAddCalendar,
-  }) {
+  factory EmptyState.noCalendars({VoidCallback? onAddCalendar}) {
     return EmptyState(
       icon: Icons.calendar_today,
       title: '暂无日历',
@@ -95,10 +84,7 @@ class EmptyState extends StatelessWidget {
   }
 
   /// 加载失败状态
-  factory EmptyState.error({
-    String? message,
-    VoidCallback? onRetry,
-  }) {
+  factory EmptyState.error({String? message, VoidCallback? onRetry}) {
     return EmptyState(
       icon: Icons.error_outline,
       title: '加载失败',

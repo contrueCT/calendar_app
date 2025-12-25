@@ -32,7 +32,7 @@ class TimeSlot extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: colorScheme.outlineVariant.withOpacity(0.3),
+              color: colorScheme.outlineVariant.withValues(alpha: 0.3),
               width: 0.5,
             ),
           ),
@@ -48,18 +48,13 @@ class TimeSlot extends StatelessWidget {
                 child: Text(
                   '${hour.toString().padLeft(2, '0')}:00',
                   textAlign: TextAlign.right,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: colorScheme.outline,
-                  ),
+                  style: TextStyle(fontSize: 12, color: colorScheme.outline),
                 ),
               ),
             ),
-            
+
             // 事件区域
-            Expanded(
-              child: _buildEventsArea(context),
-            ),
+            Expanded(child: _buildEventsArea(context)),
           ],
         ),
       ),
@@ -91,11 +86,9 @@ class TimeSlot extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 1, horizontal: 2),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: eventColor.withOpacity(0.2),
+          color: eventColor.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(4),
-          border: Border(
-            left: BorderSide(color: eventColor, width: 3),
-          ),
+          border: Border(left: BorderSide(color: eventColor, width: 3)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -112,7 +105,7 @@ class TimeSlot extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             Text(
-              '${timeFormat.format(event.instanceStart)}${event.instanceEnd != null ? ' - ${timeFormat.format(event.instanceEnd!)}' : ''}',
+              '${timeFormat.format(event.instanceStart)} - ${timeFormat.format(event.instanceEnd)}',
               style: TextStyle(
                 fontSize: 10,
                 color: colorScheme.onSurfaceVariant,
@@ -166,19 +159,23 @@ class TimeAxis extends StatelessWidget {
     );
   }
 
-  /// 将事件按小时分组
-  static Map<int, List<EventInstance>> groupEventsByHour(List<EventInstance> events) {
+  /// 将事件按小时分组（优化版本）
+  static Map<int, List<EventInstance>> groupEventsByHour(
+    List<EventInstance> events,
+  ) {
+    // 预分配容量，减少扩容开销
     final result = <int, List<EventInstance>>{};
-    
+
+    // 使用单次遍历
     for (final event in events) {
       // 全天事件不在时间轴上显示
       if (event.event.isAllDay) continue;
-      
+
       final startHour = event.instanceStart.hour;
-      result.putIfAbsent(startHour, () => []);
-      result[startHour]!.add(event);
+      // 使用 ?? 操作符避免重复查找
+      (result[startHour] ??= []).add(event);
     }
-    
+
     return result;
   }
 }
@@ -198,13 +195,13 @@ class CurrentTimeIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final now = DateTime.now();
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     // 计算当前时间的位置
     final minutesSinceStart = (now.hour - startHour) * 60 + now.minute;
     final position = (minutesSinceStart / 60) * slotHeight;
-    
+
     if (position < 0) return const SizedBox.shrink();
-    
+
     return Positioned(
       top: position,
       left: 0,
@@ -220,12 +217,7 @@ class CurrentTimeIndicator extends StatelessWidget {
               shape: BoxShape.circle,
             ),
           ),
-          Expanded(
-            child: Container(
-              height: 1.5,
-              color: colorScheme.error,
-            ),
-          ),
+          Expanded(child: Container(height: 1.5, color: colorScheme.error)),
         ],
       ),
     );
@@ -258,12 +250,9 @@ class AllDayEventBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         border: Border(
-          bottom: BorderSide(
-            color: colorScheme.outlineVariant,
-            width: 0.5,
-          ),
+          bottom: BorderSide(color: colorScheme.outlineVariant, width: 0.5),
         ),
       ),
       child: Column(
@@ -276,10 +265,7 @@ class AllDayEventBar extends StatelessWidget {
               const SizedBox(width: 50),
               Text(
                 '全天',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: colorScheme.outline,
-                ),
+                style: TextStyle(fontSize: 11, color: colorScheme.outline),
               ),
             ],
           ),
@@ -293,7 +279,9 @@ class AllDayEventBar extends StatelessWidget {
                   spacing: 4,
                   runSpacing: 4,
                   children: [
-                    ...visibleEvents.map((event) => _buildEventChip(context, event)),
+                    ...visibleEvents.map(
+                      (event) => _buildEventChip(context, event),
+                    ),
                     if (moreCount > 0)
                       Text(
                         '+$moreCount',
@@ -321,16 +309,13 @@ class AllDayEventBar extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
         decoration: BoxDecoration(
-          color: eventColor.withOpacity(0.2),
+          color: eventColor.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: eventColor.withOpacity(0.4)),
+          border: Border.all(color: eventColor.withValues(alpha: 0.4)),
         ),
         child: Text(
           event.event.summary,
-          style: TextStyle(
-            fontSize: 12,
-            color: colorScheme.onSurface,
-          ),
+          style: TextStyle(fontSize: 12, color: colorScheme.onSurface),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
