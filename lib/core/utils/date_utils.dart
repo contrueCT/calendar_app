@@ -15,13 +15,19 @@ class DateTimeUtils {
   }
 
   /// 获取一周的开始（周一）
-  static DateTime startOfWeek(DateTime date, {int weekStartsOn = DateTime.monday}) {
+  static DateTime startOfWeek(
+    DateTime date, {
+    int weekStartsOn = DateTime.monday,
+  }) {
     final daysToSubtract = (date.weekday - weekStartsOn + 7) % 7;
     return startOfDay(date.subtract(Duration(days: daysToSubtract)));
   }
 
   /// 获取一周的结束（周日）
-  static DateTime endOfWeek(DateTime date, {int weekStartsOn = DateTime.monday}) {
+  static DateTime endOfWeek(
+    DateTime date, {
+    int weekStartsOn = DateTime.monday,
+  }) {
     final start = startOfWeek(date, weekStartsOn: weekStartsOn);
     return endOfDay(start.add(const Duration(days: 6)));
   }
@@ -53,7 +59,11 @@ class DateTimeUtils {
   }
 
   /// 判断两个日期是否是同一周
-  static bool isSameWeek(DateTime a, DateTime b, {int weekStartsOn = DateTime.monday}) {
+  static bool isSameWeek(
+    DateTime a,
+    DateTime b, {
+    int weekStartsOn = DateTime.monday,
+  }) {
     final startA = startOfWeek(a, weekStartsOn: weekStartsOn);
     final startB = startOfWeek(b, weekStartsOn: weekStartsOn);
     return isSameDay(startA, startB);
@@ -84,16 +94,21 @@ class DateTimeUtils {
   /// 获取某年某月的第n个星期几
   /// weekday: 1-7 (周一到周日)
   /// n: 正数表示第n个，负数表示倒数第n个
-  static DateTime? getNthWeekdayOfMonth(int year, int month, int weekday, int n) {
+  static DateTime? getNthWeekdayOfMonth(
+    int year,
+    int month,
+    int weekday,
+    int n,
+  ) {
     if (n == 0) return null;
-    
+
     if (n > 0) {
       // 正数：从月初开始找
       final firstDay = DateTime(year, month, 1);
       int daysToAdd = (weekday - firstDay.weekday + 7) % 7;
       DateTime result = firstDay.add(Duration(days: daysToAdd));
       result = result.add(Duration(days: (n - 1) * 7));
-      
+
       // 检查是否仍在同一月
       if (result.month != month) return null;
       return result;
@@ -103,7 +118,7 @@ class DateTimeUtils {
       int daysToSubtract = (lastDay.weekday - weekday + 7) % 7;
       DateTime result = lastDay.subtract(Duration(days: daysToSubtract));
       result = result.subtract(Duration(days: (-n - 1) * 7));
-      
+
       // 检查是否仍在同一月
       if (result.month != month) return null;
       return result;
@@ -114,7 +129,7 @@ class DateTimeUtils {
   static DateTime addMonths(DateTime date, int months) {
     int newYear = date.year;
     int newMonth = date.month + months;
-    
+
     while (newMonth > 12) {
       newYear++;
       newMonth -= 12;
@@ -123,10 +138,10 @@ class DateTimeUtils {
       newYear--;
       newMonth += 12;
     }
-    
+
     final maxDay = daysInMonth(newYear, newMonth);
     final day = date.day > maxDay ? maxDay : date.day;
-    
+
     return DateTime(
       newYear,
       newMonth,
@@ -189,7 +204,7 @@ class DateTimeUtils {
     try {
       // 格式: YYYYMMDD 或 YYYYMMDDTHHmmss 或 YYYYMMDDTHHmmssZ
       final cleanStr = dateStr.replaceAll('-', '').replaceAll(':', '');
-      
+
       if (cleanStr.length == 8) {
         // 仅日期格式 YYYYMMDD
         return DateTime(
@@ -200,15 +215,17 @@ class DateTimeUtils {
       } else if (cleanStr.length >= 15) {
         // 带时间格式
         final isUtc = cleanStr.endsWith('Z');
-        final timeStr = isUtc ? cleanStr.substring(0, cleanStr.length - 1) : cleanStr;
-        
+        final timeStr = isUtc
+            ? cleanStr.substring(0, cleanStr.length - 1)
+            : cleanStr;
+
         final year = int.parse(timeStr.substring(0, 4));
         final month = int.parse(timeStr.substring(4, 6));
         final day = int.parse(timeStr.substring(6, 8));
         final hour = int.parse(timeStr.substring(9, 11));
         final minute = int.parse(timeStr.substring(11, 13));
         final second = int.parse(timeStr.substring(13, 15));
-        
+
         final dt = DateTime(year, month, day, hour, minute, second);
         return isUtc ? dt.toLocal() : dt;
       }
@@ -221,13 +238,13 @@ class DateTimeUtils {
   /// 格式化为iCalendar日期时间字符串（UTC）
   static String toICalDateTime(DateTime date, {bool dateOnly = false}) {
     final utc = date.toUtc();
-    
+
     if (dateOnly) {
       return '${utc.year.toString().padLeft(4, '0')}'
           '${utc.month.toString().padLeft(2, '0')}'
           '${utc.day.toString().padLeft(2, '0')}';
     }
-    
+
     return '${utc.year.toString().padLeft(4, '0')}'
         '${utc.month.toString().padLeft(2, '0')}'
         '${utc.day.toString().padLeft(2, '0')}T'

@@ -36,7 +36,9 @@ void main() {
       });
 
       test('应正确解析带UNTIL的规则', () {
-        final rule = RecurrenceRule.fromRRuleString('FREQ=MONTHLY;UNTIL=20251231');
+        final rule = RecurrenceRule.fromRRuleString(
+          'FREQ=MONTHLY;UNTIL=20251231',
+        );
 
         expect(rule, isNotNull);
         expect(rule!.until, isNotNull);
@@ -46,7 +48,9 @@ void main() {
       });
 
       test('应正确解析带BYDAY的周重复规则', () {
-        final rule = RecurrenceRule.fromRRuleString('FREQ=WEEKLY;BYDAY=MO,WE,FR');
+        final rule = RecurrenceRule.fromRRuleString(
+          'FREQ=WEEKLY;BYDAY=MO,WE,FR',
+        );
 
         expect(rule, isNotNull);
         expect(rule!.byDay, isNotNull);
@@ -76,7 +80,9 @@ void main() {
       });
 
       test('应正确解析BYMONTHDAY', () {
-        final rule = RecurrenceRule.fromRRuleString('FREQ=MONTHLY;BYMONTHDAY=15');
+        final rule = RecurrenceRule.fromRRuleString(
+          'FREQ=MONTHLY;BYMONTHDAY=15',
+        );
 
         expect(rule, isNotNull);
         expect(rule!.byMonthDay, isNotNull);
@@ -84,7 +90,9 @@ void main() {
       });
 
       test('应正确解析BYMONTH', () {
-        final rule = RecurrenceRule.fromRRuleString('FREQ=YEARLY;BYMONTH=1,6,12');
+        final rule = RecurrenceRule.fromRRuleString(
+          'FREQ=YEARLY;BYMONTH=1,6,12',
+        );
 
         expect(rule, isNotNull);
         expect(rule!.byMonth, isNotNull);
@@ -95,7 +103,9 @@ void main() {
       });
 
       test('应正确解析BYSETPOS', () {
-        final rule = RecurrenceRule.fromRRuleString('FREQ=MONTHLY;BYDAY=MO;BYSETPOS=-1');
+        final rule = RecurrenceRule.fromRRuleString(
+          'FREQ=MONTHLY;BYDAY=MO;BYSETPOS=-1',
+        );
 
         expect(rule, isNotNull);
         expect(rule!.bySetPos, isNotNull);
@@ -287,7 +297,10 @@ void main() {
 
     group('copyWith', () {
       test('应正确复制并修改', () {
-        const original = RecurrenceRule(frequency: Frequency.daily, interval: 1);
+        const original = RecurrenceRule(
+          frequency: Frequency.daily,
+          interval: 1,
+        );
         final copied = original.copyWith(interval: 2, count: 5);
 
         expect(copied.frequency, Frequency.daily);

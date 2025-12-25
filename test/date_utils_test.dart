@@ -42,7 +42,10 @@ void main() {
 
       test('应支持周日作为周起始', () {
         final date = DateTime(2025, 12, 25); // 周四
-        final result = DateTimeUtils.startOfWeek(date, weekStartsOn: DateTime.sunday);
+        final result = DateTimeUtils.startOfWeek(
+          date,
+          weekStartsOn: DateTime.sunday,
+        );
 
         expect(result.weekday, DateTime.sunday);
         expect(result.day, 21); // 12月21日是周日
@@ -188,21 +191,36 @@ void main() {
 
     group('getNthWeekdayOfMonth', () {
       test('应返回第一个周一', () {
-        final result = DateTimeUtils.getNthWeekdayOfMonth(2025, 12, DateTime.monday, 1);
+        final result = DateTimeUtils.getNthWeekdayOfMonth(
+          2025,
+          12,
+          DateTime.monday,
+          1,
+        );
 
         expect(result, isNotNull);
         expect(result!.day, 1); // 2025年12月1日是周一
       });
 
       test('应返回第二个周五', () {
-        final result = DateTimeUtils.getNthWeekdayOfMonth(2025, 12, DateTime.friday, 2);
+        final result = DateTimeUtils.getNthWeekdayOfMonth(
+          2025,
+          12,
+          DateTime.friday,
+          2,
+        );
 
         expect(result, isNotNull);
         expect(result!.day, 12);
       });
 
       test('应返回最后一个周五', () {
-        final result = DateTimeUtils.getNthWeekdayOfMonth(2025, 12, DateTime.friday, -1);
+        final result = DateTimeUtils.getNthWeekdayOfMonth(
+          2025,
+          12,
+          DateTime.friday,
+          -1,
+        );
 
         expect(result, isNotNull);
         expect(result!.day, 26);
@@ -210,7 +228,12 @@ void main() {
 
       test('不存在的日期应返回null', () {
         // 2025年12月没有第6个周一
-        final result = DateTimeUtils.getNthWeekdayOfMonth(2025, 12, DateTime.monday, 6);
+        final result = DateTimeUtils.getNthWeekdayOfMonth(
+          2025,
+          12,
+          DateTime.monday,
+          6,
+        );
 
         expect(result, isNull);
       });

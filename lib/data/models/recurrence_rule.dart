@@ -58,7 +58,9 @@ class ByDayRule {
 
   /// 从RRULE字符串解析（如 "1MO", "-1FR", "MO"）
   static ByDayRule? fromString(String value) {
-    final match = RegExp(r'^(-?\d+)?([A-Z]{2})$').firstMatch(value.toUpperCase());
+    final match = RegExp(
+      r'^(-?\d+)?([A-Z]{2})$',
+    ).firstMatch(value.toUpperCase());
     if (match == null) return null;
 
     final posStr = match.group(1);
@@ -172,25 +174,37 @@ class RecurrenceRule {
     // 解析月份
     List<int>? byMonth;
     if (params['BYMONTH'] != null) {
-      byMonth = params['BYMONTH']!.split(',').map((e) => int.parse(e.trim())).toList();
+      byMonth = params['BYMONTH']!
+          .split(',')
+          .map((e) => int.parse(e.trim()))
+          .toList();
     }
 
     // 解析BYSETPOS
     List<int>? bySetPos;
     if (params['BYSETPOS'] != null) {
-      bySetPos = params['BYSETPOS']!.split(',').map((e) => int.parse(e.trim())).toList();
+      bySetPos = params['BYSETPOS']!
+          .split(',')
+          .map((e) => int.parse(e.trim()))
+          .toList();
     }
 
     // 解析BYYEARDAY
     List<int>? byYearDay;
     if (params['BYYEARDAY'] != null) {
-      byYearDay = params['BYYEARDAY']!.split(',').map((e) => int.parse(e.trim())).toList();
+      byYearDay = params['BYYEARDAY']!
+          .split(',')
+          .map((e) => int.parse(e.trim()))
+          .toList();
     }
 
     // 解析BYWEEKNO
     List<int>? byWeekNo;
     if (params['BYWEEKNO'] != null) {
-      byWeekNo = params['BYWEEKNO']!.split(',').map((e) => int.parse(e.trim())).toList();
+      byWeekNo = params['BYWEEKNO']!
+          .split(',')
+          .map((e) => int.parse(e.trim()))
+          .toList();
     }
 
     // 解析周起始日
@@ -371,17 +385,17 @@ class RecurrenceRule {
         final targetDay = eventStart.day;
         int newMonth = current.month + interval;
         int newYear = current.year;
-        
+
         // 处理年份进位
         while (newMonth > 12) {
           newMonth -= 12;
           newYear++;
         }
-        
+
         // 处理月末日期：如果目标日期超过该月天数，使用该月最后一天
         final lastDay = DateTime(newYear, newMonth + 1, 0).day;
         final actualDay = targetDay > lastDay ? lastDay : targetDay;
-        
+
         return DateTime(
           newYear,
           newMonth,
@@ -470,7 +484,9 @@ class RecurrenceRule {
   }
 
   /// 解析BYDAY，同时返回简单星期列表和带位置的规则列表
-  static (List<WeekDay>, List<ByDayRule>?) _parseByDayWithPosition(String byDayStr) {
+  static (List<WeekDay>, List<ByDayRule>?) _parseByDayWithPosition(
+    String byDayStr,
+  ) {
     final days = <WeekDay>[];
     final rules = <ByDayRule>[];
     bool hasPosition = false;

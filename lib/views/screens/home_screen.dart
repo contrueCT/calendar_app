@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/calendar_viewmodel.dart';
+import '../../data/models/event_model.dart';
+import 'month_view_screen.dart';
+import 'week_view_screen.dart';
+import 'day_view_screen.dart';
+import '../widgets/common/common.dart';
 
 /// 首页 - 日历主界面
 class HomeScreen extends StatefulWidget {
@@ -23,198 +28,357 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Flutter日历'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.today),
-            onPressed: () {
-              context.read<CalendarViewModel>().goToToday();
-            },
-            tooltip: '今天',
-          ),
-          PopupMenuButton<CalendarViewMode>(
-            icon: const Icon(Icons.view_agenda),
-            tooltip: '视图切换',
-            onSelected: (mode) {
-              context.read<CalendarViewModel>().setViewMode(mode);
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: CalendarViewMode.month,
-                child: Text('月视图'),
-              ),
-              const PopupMenuItem(
-                value: CalendarViewMode.week,
-                child: Text('周视图'),
-              ),
-              const PopupMenuItem(
-                value: CalendarViewMode.day,
-                child: Text('日视图'),
-              ),
-            ],
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // TODO: 导航到设置页面
-            },
-            tooltip: '设置',
-          ),
-        ],
-      ),
+      appBar: _buildAppBar(context),
       body: Consumer<CalendarViewModel>(
         builder: (context, viewModel, child) {
-          if (viewModel.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (viewModel.error != null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    viewModel.error!,
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      viewModel.clearError();
-                      viewModel.refresh();
-                    },
-                    child: const Text('重试'),
-                  ),
-                ],
-              ),
+          if (viewModel.isLoading && viewModel.events.isEmpty) {
+            return const LoadingOverlay(
+              isLoading: true,
+              message: '加载中...',
+              child: SizedBox.expand(),
             );
           }
 
-          // TODO: 根据viewMode显示不同的视图
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.calendar_month,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Flutter日历应用',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '阶段一：基础架构已完成',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  '当前视图: ${_getViewModeName(viewModel.viewMode)}',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                Text(
-                  '选中日期: ${_formatDate(viewModel.selectedDate)}',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                Text(
-                  '日历数量: ${viewModel.calendars.length}',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                Text(
-                  '事件数量: ${viewModel.events.length}',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
-            ),
-          );
+          if (viewModel.error != null) {
+            return EmptyState.error(
+              message: viewModel.error!,
+              onRetry: () {
+                viewModel.clearError();
+                viewModel.refresh();
+              },
+            );
+          }
+
+          // 根据 viewMode 显示不同的视图
+          return _buildCalendarView(context, viewModel);
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: 导航到添加事件页面
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('添加事件功能将在后续阶段实现')));
-        },
+        onPressed: () => _handleAddEvent(context),
         tooltip: '添加事件',
         child: const Icon(Icons.add),
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Icon(Icons.calendar_month, size: 48, color: Colors.white),
-                  SizedBox(height: 8),
-                  Text(
-                    'Flutter日历',
-                    style: TextStyle(color: Colors.white, fontSize: 24),
-                  ),
-                ],
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.calendar_today),
-              title: const Text('日历管理'),
-              onTap: () {
-                Navigator.pop(context);
-                // TODO: 导航到日历管理页面
+      drawer: _buildDrawer(context),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    return AppBar(
+      title: Consumer<CalendarViewModel>(
+        builder: (context, viewModel, child) {
+          return Text(_getAppBarTitle(viewModel));
+        },
+      ),
+      actions: [
+        // 今天按钮
+        IconButton(
+          icon: const Icon(Icons.today),
+          onPressed: () {
+            context.read<CalendarViewModel>().goToToday();
+          },
+          tooltip: '今天',
+        ),
+        
+        // 视图切换按钮
+        Consumer<CalendarViewModel>(
+          builder: (context, viewModel, child) {
+            return PopupMenuButton<CalendarViewMode>(
+              icon: Icon(_getViewModeIcon(viewModel.viewMode)),
+              tooltip: '视图切换',
+              onSelected: (mode) {
+                viewModel.setViewMode(mode);
               },
+              itemBuilder: (context) => [
+                _buildViewModeMenuItem(
+                  CalendarViewMode.month,
+                  '月视图',
+                  Icons.calendar_view_month,
+                  viewModel.viewMode,
+                ),
+                _buildViewModeMenuItem(
+                  CalendarViewMode.week,
+                  '周视图',
+                  Icons.view_week,
+                  viewModel.viewMode,
+                ),
+                _buildViewModeMenuItem(
+                  CalendarViewMode.day,
+                  '日视图',
+                  Icons.view_day,
+                  viewModel.viewMode,
+                ),
+              ],
+            );
+          },
+        ),
+        
+        // 设置按钮
+        IconButton(
+          icon: const Icon(Icons.settings),
+          onPressed: () {
+            // TODO: 导航到设置页面
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('设置功能将在后续阶段实现')),
+            );
+          },
+          tooltip: '设置',
+        ),
+      ],
+    );
+  }
+
+  PopupMenuItem<CalendarViewMode> _buildViewModeMenuItem(
+    CalendarViewMode mode,
+    String label,
+    IconData icon,
+    CalendarViewMode currentMode,
+  ) {
+    final isSelected = mode == currentMode;
+    return PopupMenuItem(
+      value: mode,
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            color: isSelected ? Theme.of(context).colorScheme.primary : null,
+          ),
+          const SizedBox(width: 12),
+          Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Theme.of(context).colorScheme.primary : null,
+              fontWeight: isSelected ? FontWeight.bold : null,
             ),
-            ListTile(
-              leading: const Icon(Icons.cloud_download),
-              title: const Text('订阅管理'),
-              onTap: () {
-                Navigator.pop(context);
-                // TODO: 导航到订阅管理页面
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.import_export),
-              title: const Text('导入/导出'),
-              onTap: () {
-                Navigator.pop(context);
-                // TODO: 导航到导入导出页面
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('设置'),
-              onTap: () {
-                Navigator.pop(context);
-                // TODO: 导航到设置页面
-              },
+          ),
+          if (isSelected) ...[
+            const Spacer(),
+            Icon(
+              Icons.check,
+              size: 18,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ],
-        ),
+        ],
       ),
     );
   }
 
-  String _getViewModeName(CalendarViewMode mode) {
-    switch (mode) {
+  Widget _buildCalendarView(BuildContext context, CalendarViewModel viewModel) {
+    switch (viewModel.viewMode) {
       case CalendarViewMode.month:
-        return '月视图';
+        return MonthViewScreen(
+          initialDate: viewModel.selectedDate,
+          onDaySelected: (day) {
+            viewModel.selectDate(day);
+          },
+          onEventTap: (event) => _handleEventTap(context, event),
+        );
+      
       case CalendarViewMode.week:
-        return '周视图';
+        return WeekViewScreen(
+          initialDate: viewModel.selectedDate,
+          onDaySelected: (day) {
+            viewModel.selectDate(day);
+          },
+          onEventTap: (event) => _handleEventTap(context, event),
+          onTimeSlotTap: (date, hour) => _handleTimeSlotTap(context, date, hour),
+        );
+      
       case CalendarViewMode.day:
-        return '日视图';
+        return DayViewScreen(
+          initialDate: viewModel.selectedDate,
+          onDateChanged: (day) {
+            viewModel.selectDate(day);
+          },
+          onEventTap: (event) => _handleEventTap(context, event),
+          onTimeSlotTap: (date, hour) => _handleTimeSlotTap(context, date, hour),
+        );
     }
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.year}年${date.month}月${date.day}日';
+  Widget _buildDrawer(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Icon(
+                  Icons.calendar_month,
+                  size: 48,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Flutter日历',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    fontSize: 24,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Consumer<CalendarViewModel>(
+                  builder: (context, viewModel, child) {
+                    return Text(
+                      '${viewModel.calendars.length} 个日历 · ${viewModel.events.length} 个事件',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                        fontSize: 12,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          
+          // 日历管理
+          ListTile(
+            leading: const Icon(Icons.calendar_today),
+            title: const Text('日历管理'),
+            onTap: () {
+              Navigator.pop(context);
+              // TODO: 导航到日历管理页面
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('日历管理功能将在后续阶段实现')),
+              );
+            },
+          ),
+          
+          // 订阅管理
+          ListTile(
+            leading: const Icon(Icons.cloud_download),
+            title: const Text('订阅管理'),
+            onTap: () {
+              Navigator.pop(context);
+              // TODO: 导航到订阅管理页面
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('订阅管理功能将在后续阶段实现')),
+              );
+            },
+          ),
+          
+          // 导入/导出
+          ListTile(
+            leading: const Icon(Icons.import_export),
+            title: const Text('导入/导出'),
+            onTap: () {
+              Navigator.pop(context);
+              // TODO: 导航到导入导出页面
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('导入/导出功能将在后续阶段实现')),
+              );
+            },
+          ),
+          
+          const Divider(),
+          
+          // 设置
+          ListTile(
+            leading: const Icon(Icons.settings),
+            title: const Text('设置'),
+            onTap: () {
+              Navigator.pop(context);
+              // TODO: 导航到设置页面
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('设置功能将在后续阶段实现')),
+              );
+            },
+          ),
+          
+          // 关于
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: const Text('关于'),
+            onTap: () {
+              Navigator.pop(context);
+              _showAboutDialog(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getAppBarTitle(CalendarViewModel viewModel) {
+    final date = viewModel.selectedDate;
+    switch (viewModel.viewMode) {
+      case CalendarViewMode.month:
+        return '${date.year}年${date.month}月';
+      case CalendarViewMode.week:
+        return '${date.year}年${date.month}月 第${_getWeekOfMonth(date)}周';
+      case CalendarViewMode.day:
+        return '${date.year}年${date.month}月${date.day}日';
+    }
+  }
+
+  int _getWeekOfMonth(DateTime date) {
+    final firstDayOfMonth = DateTime(date.year, date.month, 1);
+    final firstWeekday = firstDayOfMonth.weekday % 7;
+    return ((date.day + firstWeekday - 1) / 7).ceil();
+  }
+
+  IconData _getViewModeIcon(CalendarViewMode mode) {
+    switch (mode) {
+      case CalendarViewMode.month:
+        return Icons.calendar_view_month;
+      case CalendarViewMode.week:
+        return Icons.view_week;
+      case CalendarViewMode.day:
+        return Icons.view_day;
+    }
+  }
+
+  void _handleAddEvent(BuildContext context) {
+    // TODO: 导航到添加事件页面
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('添加事件功能将在后续阶段实现')),
+    );
+  }
+
+  void _handleEventTap(BuildContext context, EventInstance event) {
+    // TODO: 导航到事件详情页面
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('查看事件: ${event.event.summary}')),
+    );
+  }
+
+  void _handleTimeSlotTap(BuildContext context, DateTime date, int hour) {
+    // TODO: 导航到添加事件页面，预填日期和时间
+    final timeStr = '${hour.toString().padLeft(2, '0')}:00';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('在 ${date.month}月${date.day}日 $timeStr 添加事件')),
+    );
+  }
+
+  void _showAboutDialog(BuildContext context) {
+    showAboutDialog(
+      context: context,
+      applicationName: 'Flutter日历',
+      applicationVersion: '1.0.0',
+      applicationIcon: Icon(
+        Icons.calendar_month,
+        size: 48,
+        color: Theme.of(context).colorScheme.primary,
+      ),
+      applicationLegalese: '© 2024 Flutter日历应用',
+      children: [
+        const SizedBox(height: 16),
+        const Text('一款支持农历显示的跨平台日历应用。'),
+        const SizedBox(height: 8),
+        const Text('功能特点:'),
+        const Text('• 月/周/日视图切换'),
+        const Text('• 农历日期显示'),
+        const Text('• 事件管理'),
+        const Text('• 重复事件'),
+        const Text('• 提醒功能'),
+      ],
+    );
   }
 }

@@ -14,7 +14,7 @@ class ICalendarUtils {
   static List<EventModel> parseICalendar(String icsContent, String calendarId) {
     final events = <EventModel>[];
     final lines = _unfoldLines(icsContent.split(RegExp(r'\r?\n')));
-    
+
     int i = 0;
     while (i < lines.length) {
       if (lines[i].toUpperCase() == 'BEGIN:VEVENT') {
@@ -31,14 +31,17 @@ class ICalendarUtils {
       }
       i++;
     }
-    
+
     return events;
   }
 
   /// 将事件列表导出为iCalendar格式
-  static String exportToICalendar(List<EventModel> events, {String? calendarName}) {
+  static String exportToICalendar(
+    List<EventModel> events, {
+    String? calendarName,
+  }) {
     final buffer = StringBuffer();
-    
+
     // 日历头部
     buffer.writeln('BEGIN:VCALENDAR');
     buffer.writeln('VERSION:2.0');
@@ -48,14 +51,14 @@ class ICalendarUtils {
     if (calendarName != null) {
       buffer.writeln('X-WR-CALNAME:$calendarName');
     }
-    
+
     // 导出每个事件
     for (final event in events) {
       buffer.write(_exportVEvent(event));
     }
-    
+
     buffer.writeln('END:VCALENDAR');
-    
+
     return buffer.toString();
   }
 
@@ -80,11 +83,11 @@ class ICalendarUtils {
     int sequence = 0;
 
     final alarms = <List<String>>[];
-    
+
     int i = 0;
     while (i < lines.length) {
       final line = lines[i];
-      
+
       if (line.toUpperCase() == 'BEGIN:VALARM') {
         final alarmLines = <String>[];
         i++;
@@ -98,10 +101,10 @@ class ICalendarUtils {
         if (colonIndex > 0) {
           final property = line.substring(0, colonIndex).toUpperCase();
           final value = line.substring(colonIndex + 1);
-          
+
           // 处理带参数的属性
           final baseProperty = property.split(';').first;
-          
+
           switch (baseProperty) {
             case 'UID':
               uid = value;
@@ -116,7 +119,9 @@ class ICalendarUtils {
               location = _unescapeText(value);
               break;
             case 'DTSTART':
-              isAllDay = property.contains('VALUE=DATE') && !property.contains('VALUE=DATE-TIME');
+              isAllDay =
+                  property.contains('VALUE=DATE') &&
+                  !property.contains('VALUE=DATE-TIME');
               dtStart = DateTimeUtils.parseICalDateTime(value);
               break;
             case 'DTEND':
@@ -163,20 +168,20 @@ class ICalendarUtils {
       }
       i++;
     }
-    
+
     // 必需字段验证
     if (dtStart == null) {
       return null;
     }
-    
+
     // 生成UID（如果没有）
     uid ??= _uuid.v4();
-    
+
     // 生成时间戳
     final now = DateTime.now();
     createdAt ??= now;
     updatedAt ??= now;
-    
+
     // 解析提醒
     int notificationId = uid.hashCode;
     for (final alarmLines in alarms) {
@@ -185,7 +190,7 @@ class ICalendarUtils {
         reminders.add(reminder);
       }
     }
-    
+
     return EventModel(
       uid: uid,
       calendarId: calendarId,
@@ -209,16 +214,20 @@ class ICalendarUtils {
   }
 
   /// 解析VALARM
-  static ReminderModel? _parseVAlarm(List<String> lines, String eventUid, int notificationId) {
+  static ReminderModel? _parseVAlarm(
+    List<String> lines,
+    String eventUid,
+    int notificationId,
+  ) {
     String? action;
     int? triggerMinutes;
-    
+
     for (final line in lines) {
       final colonIndex = line.indexOf(':');
       if (colonIndex > 0) {
         final property = line.substring(0, colonIndex).toUpperCase();
         final value = line.substring(colonIndex + 1);
-        
+
         switch (property.split(';').first) {
           case 'ACTION':
             action = value.toUpperCase();
@@ -229,11 +238,11 @@ class ICalendarUtils {
         }
       }
     }
-    
+
     if (action == null || triggerMinutes == null) {
       return null;
     }
-    
+
     return ReminderModel(
       eventUid: eventUid,
       type: action == 'AUDIO' ? ReminderType.alarm : ReminderType.notification,
@@ -246,46 +255,53 @@ class ICalendarUtils {
   static int? _parseTrigger(String value, String property) {
     // 处理RELATED=END等参数
     final isRelatedToEnd = property.contains('RELATED=END');
-    
+
     // 解析持续时间格式: -PT15M, -P1D, PT0S等
-    final match = RegExp(r'^(-?)P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$').firstMatch(value);
+    final match = RegExp(
+      r'^(-?)P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$',
+    ).firstMatch(value);
     if (match == null) {
       return null;
     }
-    
+
     final isNegative = match.group(1) == '-';
     final days = int.tryParse(match.group(2) ?? '0') ?? 0;
     final hours = int.tryParse(match.group(3) ?? '0') ?? 0;
     final minutes = int.tryParse(match.group(4) ?? '0') ?? 0;
     final seconds = int.tryParse(match.group(5) ?? '0') ?? 0;
-    
-    int totalMinutes = days * 24 * 60 + hours * 60 + minutes + (seconds > 0 ? 1 : 0);
-    
+
+    int totalMinutes =
+        days * 24 * 60 + hours * 60 + minutes + (seconds > 0 ? 1 : 0);
+
     // 负值表示事件开始前
     if (isNegative) {
       totalMinutes = -totalMinutes;
     }
-    
+
     // 如果是相对于结束时间，需要特殊处理（暂时忽略）
     if (isRelatedToEnd) {
       // TODO: 处理相对于结束时间的触发器
     }
-    
+
     return totalMinutes;
   }
 
   /// 导出单个VEVENT
   static String _exportVEvent(EventModel event) {
     final buffer = StringBuffer();
-    
+
     buffer.writeln('BEGIN:VEVENT');
     buffer.writeln('UID:${event.uid}');
     buffer.writeln('DTSTAMP:${DateTimeUtils.toICalDateTime(event.updatedAt)}');
-    
+
     if (event.isAllDay) {
-      buffer.writeln('DTSTART;VALUE=DATE:${DateTimeUtils.toICalDateTime(event.dtStart, dateOnly: true)}');
+      buffer.writeln(
+        'DTSTART;VALUE=DATE:${DateTimeUtils.toICalDateTime(event.dtStart, dateOnly: true)}',
+      );
       if (event.dtEnd != null) {
-        buffer.writeln('DTEND;VALUE=DATE:${DateTimeUtils.toICalDateTime(event.dtEnd!, dateOnly: true)}');
+        buffer.writeln(
+          'DTEND;VALUE=DATE:${DateTimeUtils.toICalDateTime(event.dtEnd!, dateOnly: true)}',
+        );
       }
     } else {
       buffer.writeln('DTSTART:${DateTimeUtils.toICalDateTime(event.dtStart)}');
@@ -293,66 +309,70 @@ class ICalendarUtils {
         buffer.writeln('DTEND:${DateTimeUtils.toICalDateTime(event.dtEnd!)}');
       }
     }
-    
+
     buffer.writeln('SUMMARY:${_escapeText(event.summary)}');
-    
+
     if (event.description != null && event.description!.isNotEmpty) {
       buffer.writeln('DESCRIPTION:${_escapeText(event.description!)}');
     }
-    
+
     if (event.location != null && event.location!.isNotEmpty) {
       buffer.writeln('LOCATION:${_escapeText(event.location!)}');
     }
-    
+
     if (event.rrule != null && event.rrule!.isNotEmpty) {
       buffer.writeln('RRULE:${event.rrule}');
     }
-    
+
     if (event.exDates != null && event.exDates!.isNotEmpty) {
       final exDatesStr = event.exDates!
           .map((d) => DateTimeUtils.toICalDateTime(d, dateOnly: event.isAllDay))
           .join(',');
       buffer.writeln('EXDATE:$exDatesStr');
     }
-    
+
     buffer.writeln('STATUS:${event.status.value.toUpperCase()}');
-    
+
     if (event.priority > 0) {
       buffer.writeln('PRIORITY:${event.priority}');
     }
-    
+
     if (event.url != null && event.url!.isNotEmpty) {
       buffer.writeln('URL:${event.url}');
     }
-    
+
     if (event.color != null) {
       buffer.writeln('COLOR:${_colorToHex(event.color!)}');
     }
-    
+
     buffer.writeln('CREATED:${DateTimeUtils.toICalDateTime(event.createdAt)}');
-    buffer.writeln('LAST-MODIFIED:${DateTimeUtils.toICalDateTime(event.updatedAt)}');
+    buffer.writeln(
+      'LAST-MODIFIED:${DateTimeUtils.toICalDateTime(event.updatedAt)}',
+    );
     buffer.writeln('SEQUENCE:${event.sequence}');
-    
+
     // 导出提醒
     for (final reminder in event.reminders) {
       buffer.write(_exportVAlarm(reminder));
     }
-    
+
     buffer.writeln('END:VEVENT');
-    
+
     return buffer.toString();
   }
 
   /// 导出VALARM
   static String _exportVAlarm(ReminderModel reminder) {
     final buffer = StringBuffer();
-    
+
     buffer.writeln('BEGIN:VALARM');
-    buffer.writeln('ACTION:${reminder.type == ReminderType.alarm ? 'AUDIO' : 'DISPLAY'}');
+    buffer.writeln(
+      'ACTION:${reminder.type == ReminderType.alarm ? 'AUDIO' : 'DISPLAY'}',
+    );
     buffer.writeln('TRIGGER:${_formatTrigger(reminder.triggerMinutes)}');
     buffer.writeln('DESCRIPTION:提醒');
     buffer.writeln('END:VALARM');
-    
+
     return buffer.toString();
   }
 
@@ -361,22 +381,22 @@ class ICalendarUtils {
     if (minutes == 0) {
       return 'PT0S';
     }
-    
+
     final isNegative = minutes < 0;
     final absMinutes = minutes.abs();
-    
+
     final days = absMinutes ~/ (24 * 60);
     final remainingMinutes = absMinutes % (24 * 60);
     final hours = remainingMinutes ~/ 60;
     final mins = remainingMinutes % 60;
-    
+
     final buffer = StringBuffer();
     buffer.write(isNegative ? '-P' : 'P');
-    
+
     if (days > 0) {
       buffer.write('${days}D');
     }
-    
+
     if (hours > 0 || mins > 0) {
       buffer.write('T');
       if (hours > 0) {
@@ -386,7 +406,7 @@ class ICalendarUtils {
         buffer.write('${mins}M');
       }
     }
-    
+
     return buffer.toString();
   }
 
@@ -394,10 +414,10 @@ class ICalendarUtils {
   static List<String> _unfoldLines(List<String> lines) {
     final result = <String>[];
     String current = '';
-    
+
     for (final line in lines) {
       if (line.isEmpty) continue;
-      
+
       if (line.startsWith(' ') || line.startsWith('\t')) {
         // 续行
         current += line.substring(1);
@@ -408,11 +428,11 @@ class ICalendarUtils {
         current = line;
       }
     }
-    
+
     if (current.isNotEmpty) {
       result.add(current);
     }
-    
+
     return result;
   }
 
@@ -451,12 +471,12 @@ class ICalendarUtils {
   static int? _parseColor(String value) {
     // 尝试解析各种颜色格式
     String colorStr = value.trim();
-    
+
     // 处理 #RRGGBB 格式
     if (colorStr.startsWith('#')) {
       colorStr = colorStr.substring(1);
     }
-    
+
     // 处理 CSS颜色名称（简化处理）
     final colorNames = {
       'red': 'FF0000',
@@ -468,9 +488,9 @@ class ICalendarUtils {
       'pink': 'FFC0CB',
       'cyan': '00FFFF',
     };
-    
+
     colorStr = colorNames[colorStr.toLowerCase()] ?? colorStr;
-    
+
     // 解析十六进制颜色
     if (colorStr.length == 6 || colorStr.length == 8) {
       try {
@@ -482,7 +502,7 @@ class ICalendarUtils {
         return null;
       }
     }
-    
+
     return null;
   }
 
@@ -494,9 +514,9 @@ class ICalendarUtils {
   /// 验证iCalendar内容格式
   static bool isValidICalendar(String content) {
     final trimmed = content.trim();
-    return trimmed.contains('BEGIN:VCALENDAR') && 
-           trimmed.contains('END:VCALENDAR') &&
-           trimmed.contains('BEGIN:VEVENT');
+    return trimmed.contains('BEGIN:VCALENDAR') &&
+        trimmed.contains('END:VCALENDAR') &&
+        trimmed.contains('BEGIN:VEVENT');
   }
 
   /// 从iCalendar内容中提取日历名称
@@ -512,6 +532,9 @@ class ICalendarUtils {
 
   /// 从iCalendar内容中获取事件数量
   static int countEvents(String content) {
-    return RegExp(r'BEGIN:VEVENT', caseSensitive: false).allMatches(content).length;
+    return RegExp(
+      r'BEGIN:VEVENT',
+      caseSensitive: false,
+    ).allMatches(content).length;
   }
 }

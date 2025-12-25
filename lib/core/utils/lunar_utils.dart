@@ -5,11 +5,37 @@ import '../../data/models/lunar_date.dart';
 class LunarUtils {
   LunarUtils._();
 
+  /// 公历日期转农历日期
+  static LunarDate solarToLunar(DateTime date) {
+    return getLunarDate(date);
+  }
+
+  /// 获取农历日期的简短显示文本（用于日历单元格）
+  static String getLunarDayText(LunarDate lunarDate) {
+    // 优先显示节气
+    if (lunarDate.solarTerm != null && lunarDate.solarTerm!.isNotEmpty) {
+      return lunarDate.solarTerm!;
+    }
+
+    // 其次显示农历节日
+    if (lunarDate.lunarFestivals.isNotEmpty) {
+      return lunarDate.lunarFestivals.first;
+    }
+
+    // 初一显示月份名
+    if (lunarDate.day == 1) {
+      return lunarDate.monthInChinese;
+    }
+
+    // 其他日期显示农历日
+    return lunarDate.dayInChinese;
+  }
+
   /// 获取指定日期的农历信息
   static LunarDate getLunarDate(DateTime date) {
     final lunar = Lunar.fromDate(date);
     final solar = Solar.fromDate(date);
-    
+
     return LunarDate(
       year: lunar.getYear(),
       month: lunar.getMonth(),
@@ -29,19 +55,19 @@ class LunarUtils {
   /// 优先级：节气 > 农历节日 > 农历日期
   static String getDisplayText(DateTime date) {
     final lunar = Lunar.fromDate(date);
-    
+
     // 优先显示节气
     final jieQi = lunar.getJieQi();
     if (jieQi.isNotEmpty) {
       return jieQi;
     }
-    
+
     // 其次显示农历节日
     final festivals = lunar.getFestivals();
     if (festivals.isNotEmpty) {
       return festivals.first;
     }
-    
+
     // 最后显示农历日期
     // 初一显示月份，其他显示日期
     if (lunar.getDay() == 1) {
@@ -55,7 +81,7 @@ class LunarUtils {
     const months = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊'];
     final absMonth = month.abs();
     if (absMonth < 1 || absMonth > 12) return '';
-    
+
     final prefix = isLeapMonth ? '闰' : '';
     return '$prefix${months[absMonth - 1]}月';
   }
@@ -63,11 +89,38 @@ class LunarUtils {
   /// 获取农历日期名称
   static String getLunarDayName(int day) {
     if (day < 1 || day > 30) return '';
-    
+
     const days = [
-      '初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
-      '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
-      '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十',
+      '初一',
+      '初二',
+      '初三',
+      '初四',
+      '初五',
+      '初六',
+      '初七',
+      '初八',
+      '初九',
+      '初十',
+      '十一',
+      '十二',
+      '十三',
+      '十四',
+      '十五',
+      '十六',
+      '十七',
+      '十八',
+      '十九',
+      '二十',
+      '廿一',
+      '廿二',
+      '廿三',
+      '廿四',
+      '廿五',
+      '廿六',
+      '廿七',
+      '廿八',
+      '廿九',
+      '三十',
     ];
     return days[day - 1];
   }
@@ -91,7 +144,7 @@ class LunarUtils {
     final zodiac = lunar.getYearShengXiao();
     final month = lunar.getMonthInChinese();
     final day = lunar.getDayInChinese();
-    
+
     return '$yearGanZhi年（$zodiac年）$month月$day';
   }
 
@@ -99,11 +152,11 @@ class LunarUtils {
   static List<String> getFestivals(DateTime date) {
     final lunar = Lunar.fromDate(date);
     final solar = Solar.fromDate(date);
-    
+
     final festivals = <String>[];
     festivals.addAll(solar.getFestivals());
     festivals.addAll(lunar.getFestivals());
-    
+
     return festivals;
   }
 
@@ -129,15 +182,17 @@ class LunarUtils {
     final lunar = Lunar.fromDate(date);
     final dayYi = lunar.getDayYi();
     final dayJi = lunar.getDayJi();
-    
-    return {
-      'yi': List<String>.from(dayYi),
-      'ji': List<String>.from(dayJi),
-    };
+
+    return {'yi': List<String>.from(dayYi), 'ji': List<String>.from(dayJi)};
   }
 
   /// 农历日期转公历日期
-  static DateTime? lunarToSolar(int year, int month, int day, {bool isLeapMonth = false}) {
+  static DateTime? lunarToSolar(
+    int year,
+    int month,
+    int day, {
+    bool isLeapMonth = false,
+  }) {
     try {
       final lunar = Lunar.fromYmd(year, isLeapMonth ? -month : month, day);
       final solar = lunar.getSolar();

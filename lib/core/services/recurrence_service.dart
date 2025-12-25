@@ -14,8 +14,8 @@ class RecurrenceService {
   RecurrenceService({
     required EventRepository eventRepository,
     required EventCacheRepository eventCacheRepository,
-  })  : _eventRepository = eventRepository,
-        _eventCacheRepository = eventCacheRepository;
+  }) : _eventRepository = eventRepository,
+       _eventCacheRepository = eventCacheRepository;
 
   /// 获取时间范围内的所有事件实例（包含重复事件展开）
   Future<List<EventInstance>> getEventInstancesInRange(
@@ -68,10 +68,12 @@ class RecurrenceService {
     // 如果查询范围在缓存范围内，优先使用缓存
     if (rangeStart.isBefore(cacheEnd)) {
       final effectiveEnd = rangeEnd.isBefore(cacheEnd) ? rangeEnd : cacheEnd;
-      
+
       // 检查是否有缓存
-      final hasCacheData = await _eventCacheRepository.hasCacheForEvent(event.uid);
-      
+      final hasCacheData = await _eventCacheRepository.hasCacheForEvent(
+        event.uid,
+      );
+
       if (hasCacheData) {
         final cachedInstances = await _eventCacheRepository.getCachedInstances(
           event.uid,
@@ -89,16 +91,16 @@ class RecurrenceService {
 
         // 如果查询范围超出缓存范围，动态计算剩余部分
         if (rangeEnd.isAfter(cacheEnd)) {
-          final dynamicInstances = _computeInstances(
-            event,
-            cacheEnd,
-            rangeEnd,
-          );
+          final dynamicInstances = _computeInstances(event, cacheEnd, rangeEnd);
           instances.addAll(dynamicInstances);
         }
       } else {
         // 没有缓存，动态计算并异步生成缓存
-        final computedInstances = _computeInstances(event, rangeStart, rangeEnd);
+        final computedInstances = _computeInstances(
+          event,
+          rangeStart,
+          rangeEnd,
+        );
         instances.addAll(computedInstances);
 
         // 异步生成缓存（不阻塞当前请求）
@@ -190,7 +192,9 @@ class RecurrenceService {
 
     for (final event in events) {
       if (event.isRecurring) {
-        final cacheRange = await _eventCacheRepository.getCacheDateRange(event.uid);
+        final cacheRange = await _eventCacheRepository.getCacheDateRange(
+          event.uid,
+        );
 
         if (cacheRange == null) {
           // 没有缓存，生成新的
@@ -199,7 +203,8 @@ class RecurrenceService {
           final rangeEnd = now.add(const Duration(days: cacheDays));
 
           // 如果缓存不够90天，补充
-          if (cacheRange.latest != null && cacheRange.latest!.isBefore(rangeEnd)) {
+          if (cacheRange.latest != null &&
+              cacheRange.latest!.isBefore(rangeEnd)) {
             await _extendCache(event, cacheRange.latest!, rangeEnd);
           }
         }
@@ -316,7 +321,8 @@ class RecurrenceService {
     // 检查是否被排除
     if (event.exDates != null) {
       final isExcluded = event.exDates!.any(
-        (d) => d.year == date.year && d.month == date.month && d.day == date.day,
+        (d) =>
+            d.year == date.year && d.month == date.month && d.day == date.day,
       );
       if (isExcluded) return false;
     }

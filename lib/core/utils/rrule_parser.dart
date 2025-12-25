@@ -114,7 +114,7 @@ class RRuleParser {
   /// 验证RRULE字符串格式
   static bool isValidRRule(String rrule) {
     if (rrule.isEmpty) return false;
-    
+
     String ruleString = rrule;
     if (ruleString.toUpperCase().startsWith('RRULE:')) {
       ruleString = ruleString.substring(6);
@@ -145,7 +145,7 @@ class RRuleParser {
     List<DateTime>? excludeDates,
   }) {
     if (n <= 0) return null;
-    
+
     final rule = RecurrenceRule.fromRRuleString(rrule);
     if (rule == null) return null;
 
@@ -166,12 +166,14 @@ class RRuleParser {
       }
 
       // 检查是否被排除
-      final isExcluded = excludeDates?.any(
-        (date) =>
-            date.year == current.year &&
-            date.month == current.month &&
-            date.day == current.day,
-      ) ?? false;
+      final isExcluded =
+          excludeDates?.any(
+            (date) =>
+                date.year == current.year &&
+                date.month == current.month &&
+                date.day == current.day,
+          ) ??
+          false;
 
       if (!isExcluded) {
         count++;
@@ -199,12 +201,14 @@ class RRuleParser {
     if (rule == null) return false;
 
     // 检查是否被排除
-    final isExcluded = excludeDates?.any(
-      (date) =>
-          date.year == targetDate.year &&
-          date.month == targetDate.month &&
-          date.day == targetDate.day,
-    ) ?? false;
+    final isExcluded =
+        excludeDates?.any(
+          (date) =>
+              date.year == targetDate.year &&
+              date.month == targetDate.month &&
+              date.day == targetDate.day,
+        ) ??
+        false;
     if (isExcluded) return false;
 
     // 如果目标日期早于开始日期，返回false
@@ -216,9 +220,13 @@ class RRuleParser {
     }
 
     // 获取该日期范围内的所有实例
-    final startOfDay = DateTime(targetDate.year, targetDate.month, targetDate.day);
+    final startOfDay = DateTime(
+      targetDate.year,
+      targetDate.month,
+      targetDate.day,
+    );
     final endOfDay = startOfDay.add(const Duration(days: 1));
-    
+
     final occurrences = rule.getOccurrences(
       eventStart,
       startOfDay,
@@ -283,12 +291,14 @@ class RRuleParser {
         return current.add(Duration(days: 7 * rule.interval));
 
       case Frequency.monthly:
-        if (rule.bySetPos != null && rule.bySetPos!.isNotEmpty && 
-            rule.byDay != null && rule.byDay!.isNotEmpty) {
+        if (rule.bySetPos != null &&
+            rule.bySetPos!.isNotEmpty &&
+            rule.byDay != null &&
+            rule.byDay!.isNotEmpty) {
           // 处理"每月第N个星期X"的情况
           return _getNextMonthlyBySetPos(rule, current, eventStart);
         }
-        
+
         DateTime next = DateTime(
           current.year,
           current.month + rule.interval,
@@ -328,7 +338,7 @@ class RRuleParser {
   ) {
     final weekday = rule.byDay!.first;
     final position = rule.bySetPos!.first;
-    
+
     // 从下个月开始查找
     int year = current.year;
     int month = current.month + rule.interval;
@@ -337,7 +347,12 @@ class RRuleParser {
       month -= 12;
     }
 
-    final targetDate = _getNthWeekdayOfMonth(year, month, weekday.dayNumber, position);
+    final targetDate = _getNthWeekdayOfMonth(
+      year,
+      month,
+      weekday.dayNumber,
+      position,
+    );
     if (targetDate != null) {
       return DateTime(
         targetDate.year,
@@ -354,7 +369,12 @@ class RRuleParser {
       year++;
       month = 1;
     }
-    final fallbackDate = _getNthWeekdayOfMonth(year, month, weekday.dayNumber, position);
+    final fallbackDate = _getNthWeekdayOfMonth(
+      year,
+      month,
+      weekday.dayNumber,
+      position,
+    );
     return fallbackDate != null
         ? DateTime(
             fallbackDate.year,
@@ -367,16 +387,21 @@ class RRuleParser {
   }
 
   /// 获取某年某月的第N个星期几
-  static DateTime? _getNthWeekdayOfMonth(int year, int month, int weekday, int n) {
+  static DateTime? _getNthWeekdayOfMonth(
+    int year,
+    int month,
+    int weekday,
+    int n,
+  ) {
     if (n == 0) return null;
-    
+
     if (n > 0) {
       // 正数：从月初开始找
       final firstDay = DateTime(year, month, 1);
       int daysToAdd = (weekday - firstDay.weekday + 7) % 7;
       DateTime result = firstDay.add(Duration(days: daysToAdd));
       result = result.add(Duration(days: (n - 1) * 7));
-      
+
       // 检查是否仍在同一月
       if (result.month != month) return null;
       return result;
@@ -386,7 +411,7 @@ class RRuleParser {
       int daysToSubtract = (lastDay.weekday - weekday + 7) % 7;
       DateTime result = lastDay.subtract(Duration(days: daysToSubtract));
       result = result.subtract(Duration(days: (-n - 1) * 7));
-      
+
       // 检查是否仍在同一月
       if (result.month != month) return null;
       return result;

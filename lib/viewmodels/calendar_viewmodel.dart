@@ -178,11 +178,77 @@ class CalendarViewModel extends ChangeNotifier {
     return _eventsByDate[dateKey] ?? [];
   }
 
+  /// 获取指定日期的事件列表（别名，兼容视图组件）
+  List<EventInstance> getEventsForDay(DateTime day) {
+    return getEventsForDate(day);
+  }
+
   /// 判断指定日期是否有事件
   bool hasEventsOnDate(DateTime date) {
     final dateKey = date.startOfDay;
     return _eventsByDate.containsKey(dateKey) &&
         _eventsByDate[dateKey]!.isNotEmpty;
+  }
+
+  /// 选中日期（兼容视图组件）
+  void selectDate(DateTime date) {
+    setSelectedDate(date);
+  }
+
+  /// 加载指定周的事件
+  Future<void> loadEventsForWeek(DateTime date) async {
+    // 计算周的开始和结束
+    final weekday = date.weekday % 7;
+    final weekStart = date.subtract(Duration(days: weekday));
+    final weekEnd = weekStart.add(const Duration(days: 6));
+    
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final visibleCalendarIds = visibleCalendars.map((c) => c.id).toSet();
+      final allEvents = await _eventRepository.getEventsInRange(weekStart, weekEnd);
+      _events = allEvents
+          .where((e) => visibleCalendarIds.contains(e.calendarId))
+          .toList();
+
+      _eventsByDate = _buildEventsByDateMap(_events, weekStart, weekEnd);
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _error = '加载事件失败: $e';
+      notifyListeners();
+    }
+  }
+
+  /// 加载指定日期的事件
+  Future<void> loadEventsForDay(DateTime date) async {
+    final dayStart = date.startOfDay;
+    final dayEnd = dayStart.add(const Duration(days: 1));
+    
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final visibleCalendarIds = visibleCalendars.map((c) => c.id).toSet();
+      final allEvents = await _eventRepository.getEventsInRange(dayStart, dayEnd);
+      _events = allEvents
+          .where((e) => visibleCalendarIds.contains(e.calendarId))
+          .toList();
+
+      _eventsByDate = _buildEventsByDateMap(_events, dayStart, dayEnd);
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _error = '加载事件失败: $e';
+      notifyListeners();
+    }
   }
 
   /// 刷新数据

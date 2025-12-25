@@ -31,8 +31,9 @@ class EventCacheInstance {
     return {
       if (id != null) DbConstants.eventCacheId: id,
       DbConstants.eventCacheEventUid: eventUid,
-      DbConstants.eventCacheOccurrenceDate:
-          occurrenceDate.toUtc().millisecondsSinceEpoch,
+      DbConstants.eventCacheOccurrenceDate: occurrenceDate
+          .toUtc()
+          .millisecondsSinceEpoch,
       DbConstants.eventCacheIsException: isException ? 1 : 0,
     };
   }
@@ -66,7 +67,7 @@ class EventCacheRepository {
   static const int defaultCacheDays = 90;
 
   EventCacheRepository({DatabaseHelper? dbHelper})
-      : _dbHelper = dbHelper ?? DatabaseHelper();
+    : _dbHelper = dbHelper ?? DatabaseHelper();
 
   /// 获取事件在指定时间范围内的缓存实例
   Future<List<EventCacheInstance>> getCachedInstances(
@@ -90,7 +91,9 @@ class EventCacheRepository {
   }
 
   /// 获取事件的所有缓存实例
-  Future<List<EventCacheInstance>> getAllCachedInstances(String eventUid) async {
+  Future<List<EventCacheInstance>> getAllCachedInstances(
+    String eventUid,
+  ) async {
     final db = await _dbHelper.database;
 
     final maps = await db.query(
@@ -145,8 +148,9 @@ class EventCacheRepository {
       for (final date in occurrenceDates) {
         await txn.insert(DbConstants.tableEventCache, {
           DbConstants.eventCacheEventUid: eventUid,
-          DbConstants.eventCacheOccurrenceDate:
-              date.toUtc().millisecondsSinceEpoch,
+          DbConstants.eventCacheOccurrenceDate: date
+              .toUtc()
+              .millisecondsSinceEpoch,
           DbConstants.eventCacheIsException: 0,
         });
       }
@@ -276,7 +280,10 @@ class EventCacheRepository {
     if (minMs == null || maxMs == null) return null;
 
     return (
-      earliest: DateTime.fromMillisecondsSinceEpoch(minMs, isUtc: true).toLocal(),
+      earliest: DateTime.fromMillisecondsSinceEpoch(
+        minMs,
+        isUtc: true,
+      ).toLocal(),
       latest: DateTime.fromMillisecondsSinceEpoch(maxMs, isUtc: true).toLocal(),
     );
   }

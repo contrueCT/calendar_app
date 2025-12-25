@@ -138,10 +138,7 @@ void main() {
           updatedAt: now,
         );
 
-        final copied = original.copyWith(
-          summary: '新标题',
-          priority: 5,
-        );
+        final copied = original.copyWith(summary: '新标题', priority: 5);
 
         expect(copied.uid, original.uid);
         expect(copied.summary, '新标题');
@@ -265,9 +262,7 @@ void main() {
         notificationId: 123,
       );
 
-      final copied = original.copyWith(
-        triggerMinutes: -30,
-      );
+      final copied = original.copyWith(triggerMinutes: -30);
 
       expect(copied.eventUid, original.eventUid);
       expect(copied.triggerMinutes, -30);
@@ -276,7 +271,10 @@ void main() {
 
   group('ReminderType', () {
     test('fromString应正确解析', () {
-      expect(ReminderType.fromString('notification'), ReminderType.notification);
+      expect(
+        ReminderType.fromString('notification'),
+        ReminderType.notification,
+      );
       expect(ReminderType.fromString('alarm'), ReminderType.alarm);
       expect(ReminderType.fromString('invalid'), ReminderType.notification);
     });
