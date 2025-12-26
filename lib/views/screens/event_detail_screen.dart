@@ -348,7 +348,11 @@ class EventDetailScreen extends StatelessWidget {
   }
 
   void _editEvent(BuildContext context) {
-    Navigator.pushNamed(context, Routes.eventEdit, arguments: instance.event);
+    Navigator.pushNamed(
+      context,
+      Routes.eventEdit,
+      arguments: EventEditArguments(event: instance.event),
+    );
   }
 
   void _confirmDelete(BuildContext context) {

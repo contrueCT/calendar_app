@@ -52,6 +52,32 @@ class _DayViewScreenState extends State<DayViewScreen> {
   }
 
   @override
+  void didUpdateWidget(covariant DayViewScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 当外部传入的 initialDate 变化时（如点击"今天"按钮），更新本地状态和 PageController
+    if (widget.initialDate != null &&
+        widget.initialDate != oldWidget.initialDate &&
+        !_isSameDayLocal(widget.initialDate!, _selectedDate)) {
+      final newPage = widget.initialDate!.difference(_baseDate).inDays;
+      setState(() {
+        _selectedDate = widget.initialDate!;
+      });
+      // 使用动画跳转到新页面
+      if (_pageController.hasClients) {
+        _pageController.animateToPage(
+          newPage,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    }
+  }
+
+  bool _isSameDayLocal(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  @override
   void dispose() {
     _scrollController.dispose();
     _pageController.dispose();

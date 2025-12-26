@@ -170,6 +170,11 @@ class _HomeScreenState extends State<HomeScreen> {
             viewModel.selectDate(day);
           },
           onEventTap: (event) => _handleEventTap(context, event),
+          onMonthChanged: (date) {
+            // 当月份变化时，同步更新 ViewModel 的焦点日期
+            // 使用 selectDate 而不是 setFocusedDate 来避免重复加载
+            viewModel.setSelectedDate(date);
+          },
         );
 
       case CalendarViewMode.week:
@@ -181,6 +186,10 @@ class _HomeScreenState extends State<HomeScreen> {
           onEventTap: (event) => _handleEventTap(context, event),
           onTimeSlotTap: (date, hour) =>
               _handleTimeSlotTap(context, date, hour),
+          onWeekChanged: (date) {
+            // 当周变化时，同步更新 ViewModel 的选择日期
+            viewModel.setSelectedDate(date);
+          },
         );
 
       case CalendarViewMode.day:
@@ -246,10 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
             title: const Text('日历管理'),
             onTap: () {
               Navigator.pop(context);
-              // TODO: 导航到日历管理页面
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('日历管理功能将在后续阶段实现')));
+              Navigator.of(context).pushNamed(Routes.calendarManage);
             },
           ),
 
@@ -259,10 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
             title: const Text('订阅管理'),
             onTap: () {
               Navigator.pop(context);
-              // TODO: 导航到订阅管理页面
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('订阅管理功能将在后续阶段实现')));
+              Navigator.of(context).pushNamed(Routes.subscription);
             },
           ),
 
@@ -272,10 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
             title: const Text('导入/导出'),
             onTap: () {
               Navigator.pop(context);
-              // TODO: 导航到导入导出页面
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('导入/导出功能将在后续阶段实现')));
+              Navigator.of(context).pushNamed(Routes.importExport);
             },
           ),
 
@@ -335,24 +335,28 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _handleAddEvent(BuildContext context) {
-    // TODO: 导航到添加事件页面
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('添加事件功能将在后续阶段实现')));
+    Navigator.of(context).pushNamed(
+      Routes.eventCreate,
+      arguments: EventEditArguments(
+        initialDate: context.read<CalendarViewModel>().selectedDate,
+      ),
+    );
   }
 
   void _handleEventTap(BuildContext context, EventInstance event) {
-    // TODO: 导航到事件详情页面
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('查看事件: ${event.event.summary}')));
+    Navigator.of(context).pushNamed(
+      Routes.eventDetail,
+      arguments: EventDetailArguments(instance: event),
+    );
   }
 
   void _handleTimeSlotTap(BuildContext context, DateTime date, int hour) {
-    // TODO: 导航到添加事件页面，预填日期和时间
-    final timeStr = '${hour.toString().padLeft(2, '0')}:00';
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('在 ${date.month}月${date.day}日 $timeStr 添加事件')),
+    Navigator.of(context).pushNamed(
+      Routes.eventCreate,
+      arguments: EventEditArguments(
+        initialDate: date,
+        initialTime: TimeOfDay(hour: hour, minute: 0),
+      ),
     );
   }
 

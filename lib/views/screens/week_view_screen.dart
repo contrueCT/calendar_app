@@ -14,6 +14,7 @@ class WeekViewScreen extends StatefulWidget {
   final void Function(DateTime)? onDaySelected;
   final void Function(EventInstance)? onEventTap;
   final void Function(DateTime, int)? onTimeSlotTap;
+  final void Function(DateTime)? onWeekChanged;
 
   const WeekViewScreen({
     super.key,
@@ -21,6 +22,7 @@ class WeekViewScreen extends StatefulWidget {
     this.onDaySelected,
     this.onEventTap,
     this.onTimeSlotTap,
+    this.onWeekChanged,
   });
 
   @override
@@ -44,6 +46,32 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToCurrentTime();
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant WeekViewScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 当外部传入的 initialDate 变化时（如点击"今天"按钮），更新本地状态
+    // 只有当周不同时才更新（避免用户滑动周时被强制切回）
+    if (widget.initialDate != null &&
+        widget.initialDate != oldWidget.initialDate &&
+        !_isSameWeekLocal(widget.initialDate!, _focusedDay)) {
+      setState(() {
+        _focusedDay = widget.initialDate!;
+        _selectedDay = widget.initialDate;
+      });
+    }
+  }
+
+  bool _isSameDayLocal(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  bool _isSameWeekLocal(DateTime a, DateTime b) {
+    // 获取两个日期所在周的周一
+    final aWeekStart = a.subtract(Duration(days: a.weekday - 1));
+    final bWeekStart = b.subtract(Duration(days: b.weekday - 1));
+    return _isSameDayLocal(aWeekStart, bWeekStart);
   }
 
   @override
@@ -167,6 +195,8 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
         setState(() {
           _focusedDay = focusedDay;
         });
+        // 通知父级周变化
+        widget.onWeekChanged?.call(focusedDay);
         viewModel.loadEventsForWeek(focusedDay);
       },
     );

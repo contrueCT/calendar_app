@@ -21,10 +21,16 @@ class EventRepository {
 
     final events = <EventModel>[];
     for (final map in maps) {
-      final reminders = await _getRemindersForEvent(
-        map[DbConstants.eventUid] as String,
-      );
-      events.add(EventModel.fromMap(map, reminders: reminders));
+      try {
+        final reminders = await _getRemindersForEvent(
+          map[DbConstants.eventUid] as String,
+        );
+        events.add(EventModel.fromMap(map, reminders: reminders));
+      } catch (e) {
+        print(
+          'Warning: Failed to parse event in getAllEvents: ${map[DbConstants.eventUid]}, error: $e',
+        );
+      }
     }
     return events;
   }
@@ -41,10 +47,16 @@ class EventRepository {
 
     final events = <EventModel>[];
     for (final map in maps) {
-      final reminders = await _getRemindersForEvent(
-        map[DbConstants.eventUid] as String,
-      );
-      events.add(EventModel.fromMap(map, reminders: reminders));
+      try {
+        final reminders = await _getRemindersForEvent(
+          map[DbConstants.eventUid] as String,
+        );
+        events.add(EventModel.fromMap(map, reminders: reminders));
+      } catch (e) {
+        print(
+          'Warning: Failed to parse event in getEventsByCalendar: ${map[DbConstants.eventUid]}, error: $e',
+        );
+      }
     }
     return events;
   }
@@ -78,10 +90,17 @@ class EventRepository {
 
     final events = <EventModel>[];
     for (final map in maps) {
-      final reminders = await _getRemindersForEvent(
-        map[DbConstants.eventUid] as String,
-      );
-      events.add(EventModel.fromMap(map, reminders: reminders));
+      try {
+        final reminders = await _getRemindersForEvent(
+          map[DbConstants.eventUid] as String,
+        );
+        events.add(EventModel.fromMap(map, reminders: reminders));
+      } catch (e) {
+        // 跳过解析失败的事件，避免整个加载失败
+        print(
+          'Warning: Failed to parse event in getEventsInRange: ${map[DbConstants.eventUid]}, error: $e',
+        );
+      }
     }
     return events;
   }

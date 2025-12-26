@@ -14,12 +14,14 @@ class MonthViewScreen extends StatefulWidget {
   final DateTime? initialDate;
   final void Function(DateTime)? onDaySelected;
   final void Function(EventInstance)? onEventTap;
+  final void Function(DateTime)? onMonthChanged;
 
   const MonthViewScreen({
     super.key,
     this.initialDate,
     this.onDaySelected,
     this.onEventTap,
+    this.onMonthChanged,
   });
 
   @override
@@ -36,6 +38,25 @@ class _MonthViewScreenState extends State<MonthViewScreen> {
     super.initState();
     _focusedDay = widget.initialDate ?? DateTime.now();
     _selectedDay = _focusedDay;
+  }
+
+  @override
+  void didUpdateWidget(covariant MonthViewScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 当外部传入的 initialDate 变化时（如点击"今天"按钮），更新本地状态
+    // 只有当月份真正不同时才更新（避免用户滑动月份时被强制切回）
+    if (widget.initialDate != null &&
+        widget.initialDate != oldWidget.initialDate &&
+        !_isSameMonthLocal(widget.initialDate!, _focusedDay)) {
+      setState(() {
+        _focusedDay = widget.initialDate!;
+        _selectedDay = widget.initialDate;
+      });
+    }
+  }
+
+  bool _isSameMonthLocal(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month;
   }
 
   @override
@@ -182,6 +203,8 @@ class _MonthViewScreenState extends State<MonthViewScreen> {
         setState(() {
           _focusedDay = focusedDay;
         });
+        // 通知父级月份变化
+        widget.onMonthChanged?.call(focusedDay);
         // 加载新月份的事件
         viewModel.loadEventsForMonth(focusedDay);
       },

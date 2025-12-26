@@ -177,7 +177,8 @@ class EventEditViewModel extends ChangeNotifier {
       _calendars = _calendars.where((c) => !c.isSubscription).toList();
 
       // 如果当前日历ID无效，使用默认日历
-      if (!_calendars.any((c) => c.id == _calendarId)) {
+      if (_calendars.isNotEmpty &&
+          !_calendars.any((c) => c.id == _calendarId)) {
         final defaultCalendar = _calendars.firstWhere(
           (c) => c.isDefault,
           orElse: () => _calendars.first,

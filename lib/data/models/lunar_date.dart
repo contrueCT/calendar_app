@@ -52,6 +52,8 @@ class LunarDate {
   String get monthInChinese {
     const months = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊'];
     final prefix = isLeapMonth ? '闰' : '';
+    // 边界检查
+    if (month < 1 || month > 12) return '?月';
     return '$prefix${months[month - 1]}月';
   }
 
@@ -89,6 +91,8 @@ class LunarDate {
       '廿九',
       '三十',
     ];
+    // 边界检查
+    if (day < 1 || day > 30) return '?';
     return days[day - 1];
   }
 
