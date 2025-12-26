@@ -302,7 +302,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           onTap: () {
             showLicensePage(
               context: context,
-              applicationName: 'Flutter日历',
+              applicationName: '日历',
               applicationVersion: '1.0.0',
             );
           },

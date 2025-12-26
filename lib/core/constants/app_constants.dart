@@ -3,7 +3,7 @@ class AppConstants {
   AppConstants._();
 
   /// 应用名称
-  static const String appName = 'Flutter日历';
+  static const String appName = '日历';
 
   /// 数据库名称
   static const String dbName = 'calendar.db';

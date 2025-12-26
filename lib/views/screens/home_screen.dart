@@ -225,7 +225,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Flutter日历',
+                  '日历',
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onPrimary,
                     fontSize: 24,
@@ -363,14 +363,14 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showAboutDialog(BuildContext context) {
     showAboutDialog(
       context: context,
-      applicationName: 'Flutter日历',
+      applicationName: '日历',
       applicationVersion: '1.0.0',
       applicationIcon: Icon(
         Icons.calendar_month,
         size: 48,
         color: Theme.of(context).colorScheme.primary,
       ),
-      applicationLegalese: '© 2024 Flutter日历应用',
+      applicationLegalese: '© 2024 日历应用',
       children: [
         const SizedBox(height: 16),
         const Text('一款支持农历显示的跨平台日历应用。'),
