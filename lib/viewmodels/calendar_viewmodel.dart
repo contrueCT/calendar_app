@@ -158,6 +158,11 @@ class CalendarViewModel extends ChangeNotifier {
 
   /// 统一的事件加载方法（带缓存优化）
   Future<void> _loadEventsForRange(DateTime start, DateTime end) async {
+    // 确保日历列表已加载，否则 visibleCalendars 为空会导致所有事件被过滤
+    if (_calendars.isEmpty) {
+      await loadCalendars();
+    }
+
     // 获取当前可见日历ID集合
     final currentVisibleIds = visibleCalendars.map((c) => c.id).toSet();
 
@@ -401,6 +406,10 @@ class CalendarViewModel extends ChangeNotifier {
 
   /// 刷新事件列表
   Future<void> refreshEvents() async {
+    // 确保日历列表已加载，否则 visibleCalendars 为空会导致所有事件被过滤
+    if (_calendars.isEmpty) {
+      await loadCalendars();
+    }
     _clearCache();
     await loadEventsForMonth(_focusedDate);
   }
@@ -408,6 +417,10 @@ class CalendarViewModel extends ChangeNotifier {
   /// 创建事件
   Future<bool> createEvent(EventModel event) async {
     try {
+      // 确保日历列表已加载
+      if (_calendars.isEmpty) {
+        await loadCalendars();
+      }
       await _eventRepository.insertEvent(event);
       _clearCache();
       await loadEventsForMonth(_focusedDate);
@@ -422,6 +435,10 @@ class CalendarViewModel extends ChangeNotifier {
   /// 更新事件
   Future<bool> updateEvent(EventModel event) async {
     try {
+      // 确保日历列表已加载
+      if (_calendars.isEmpty) {
+        await loadCalendars();
+      }
       await _eventRepository.updateEvent(event);
       _clearCache();
       await loadEventsForMonth(_focusedDate);
@@ -436,6 +453,10 @@ class CalendarViewModel extends ChangeNotifier {
   /// 删除事件
   Future<bool> deleteEvent(String uid) async {
     try {
+      // 确保日历列表已加载
+      if (_calendars.isEmpty) {
+        await loadCalendars();
+      }
       // 先获取事件以取消其提醒
       final event = await _eventRepository.getEventByUid(uid);
       if (event != null && event.reminders.isNotEmpty) {
