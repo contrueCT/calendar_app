@@ -45,6 +45,7 @@ class CalendarViewModel extends ChangeNotifier {
   List<EventModel> _events = [];
   Map<DateTime, List<EventInstance>> _eventsByDate = {};
   bool _isLoading = false;
+  bool _isInitialized = false; // 标记是否已完成首次初始化
   String? _error;
 
   // 性能优化：缓存相关
@@ -81,8 +82,15 @@ class CalendarViewModel extends ChangeNotifier {
 
   /// 初始化
   Future<void> initialize() async {
+    _isLoading = true;
+    notifyListeners();
+
     await loadCalendars();
     await loadEventsForMonth(_focusedDate);
+
+    _isInitialized = true;
+    _isLoading = false;
+    notifyListeners();
   }
 
   /// 设置视图模式
@@ -121,42 +129,43 @@ class CalendarViewModel extends ChangeNotifier {
     }
   }
 
-  /// 加载指定月份的事件
+  /// 加载指定月份的事件（扩展范围以支持预加载）
   Future<void> loadEventsForMonth(DateTime month) async {
-    // 获取月份范围（包含前后各一周用于显示）
+    // 获取月份范围（包含前后各一个月用于预加载，避免切换月份时闪屏）
     final start = DateTime(
       month.year,
-      month.month,
+      month.month - 1, // 前一个月
       1,
-    ).subtract(const Duration(days: 7));
+    );
     final end = DateTime(
       month.year,
-      month.month + 1,
+      month.month + 2, // 后一个月的最后一天
       0,
-    ).add(const Duration(days: 8));
+    );
 
     await _loadEventsForRange(start, end);
   }
 
-  /// 加载指定周的事件
+  /// 加载指定周的事件（扩展范围以支持预加载）
   Future<void> loadEventsForWeek(DateTime date) async {
-    // 计算周的开始和结束
+    // 计算周的开始和结束（包含前后各一周用于预加载）
     final weekday = date.weekday % 7;
-    final weekStart = date.subtract(Duration(days: weekday));
-    final weekEnd = weekStart.add(const Duration(days: 7));
+    final weekStart = date.subtract(Duration(days: weekday + 7)); // 前一周
+    final weekEnd = weekStart.add(const Duration(days: 21)); // 共三周
 
     await _loadEventsForRange(weekStart, weekEnd);
   }
 
-  /// 加载指定日期的事件
+  /// 加载指定日期的事件（扩展范围以支持预加载）
   Future<void> loadEventsForDay(DateTime date) async {
-    final dayStart = date.startOfDay;
-    final dayEnd = dayStart.add(const Duration(days: 1));
+    // 加载前后各一天（共三天）
+    final dayStart = date.startOfDay.subtract(const Duration(days: 1));
+    final dayEnd = date.startOfDay.add(const Duration(days: 2));
 
     await _loadEventsForRange(dayStart, dayEnd);
   }
 
-  /// 统一的事件加载方法（带缓存优化）
+  /// 统一的事件加载方法（带缓存优化，静默更新）
   Future<void> _loadEventsForRange(DateTime start, DateTime end) async {
     // 确保日历列表已加载，否则 visibleCalendars 为空会导致所有事件被过滤
     if (_calendars.isEmpty) {
@@ -178,9 +187,9 @@ class CalendarViewModel extends ChangeNotifier {
       return;
     }
 
-    _isLoading = true;
+    // 静默更新：不显示 loading 状态，避免闪屏
+    // loading 状态只在 initialize() 首次初始化时显示
     _error = null;
-    notifyListeners();
 
     try {
       final allEvents = await _eventRepository.getEventsInRange(start, end);
@@ -195,10 +204,8 @@ class CalendarViewModel extends ChangeNotifier {
       _loadedRange = _DateRangeKey(start, end);
       _loadedCalendarIds = currentVisibleIds;
 
-      _isLoading = false;
       notifyListeners();
     } catch (e) {
-      _isLoading = false;
       _error = '加载事件失败: $e';
       notifyListeners();
     }
